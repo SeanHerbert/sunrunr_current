@@ -183,7 +183,7 @@ router.post("/record", function(req, res) {
 			 	duration = duration + " seconds";
 			 }
 			 else if(duration>60000 && duration <3600000){
-			 	duration = durations/1000;
+			 	duration = duration/1000;
 			 	var secs =  duration % 60;
 			 	duration = duration -secs;
 			 	duration = duration / 60;
