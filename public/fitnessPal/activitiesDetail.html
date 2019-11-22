@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>FitnessPal - Activities Summary</title>
+
+         <!-- Import jQuery -->
+         <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+         <!-- Import Google Icon Font -->
+         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+         <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <link href="/holz/stylesheets/holz.css" rel="stylesheet">
+    <script src="/holz/javascripts/signout.js"></script>
+
+    <script src="/holz/javascripts/activitiesDetail.js"></script>
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  </head>
+
+  <body>
+    <!-- Dropdown Structure -->
+    <ul id='dropdown1' class='dropdown-content'>
+       <li><a href="account.html">Home</a></li>
+                <li><a href="recentpotholes.html">Recent</a></li>
+                <li><a href="summary.html">Summary</a></li>
+		<li><a href = "activtiesSummary.html"</a>activities Summary</li>
+                <li class="divider"></li>
+                <li><a href="#!" id="signout">Sign out</a></li>
+
+    </ul>
+
+    <nav>
+      <div class="nav-wrapper blue-grey darken-2">
+        <a href="account.html" class="brand-logo left"><img id="logo" src="images/logo.png"><span id="name">FitnessPal</span></a>
+        <ul class="right ">
+            <!-- Dropdown Trigger -->
+                 <li><a class='dropdown-trigger btn' href='#' data-target='dropdown1'><i class="material-icons">more_vert</i></a></li>
+              </ul>
+      </div>
+    </nav>
+
+    <div class="row">
+      <div class="col s12 m6">
+        <div class="card blue-grey ">
+          <div class="card-content teal-text">
+                                <ul class="collection with-header teal lighten-2" id = "activityDetail" >
+              </ul>
+          </div>
+          <!-- <div class="card-panel blue-text" id="ServerResponse" style="display: none"></div> -->
+        </div>
+      </div>
+  </body>
+  <script>
+    $('.dropdown-trigger').dropdown();
+  </script>
+</html>           
