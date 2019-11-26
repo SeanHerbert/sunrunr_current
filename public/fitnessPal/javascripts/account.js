@@ -1,6 +1,6 @@
 function sendReqForAccountInfo() {
   $.ajax({
-    url: '/users/account',
+    url: '/node/users/account',
     type: 'GET',
     headers: { 'x-auth': window.localStorage.getItem("authToken") },
     dataType: 'json'
@@ -43,7 +43,7 @@ function accountInfoError(jqXHR, textStatus, errorThrown) {
 // Registers the specified device with the server
 function registerDevice() {
   $.ajax({
-    url: '/devices/register',
+    url: '/node/devices/register',
     type: 'POST',
     headers: { 'x-auth': window.localStorage.getItem("authToken") },  
     contentType: 'application/json',
@@ -70,7 +70,7 @@ function registerDevice() {
 
 function pingDevice(event, deviceId) {
    $.ajax({
-        url: '/devices/ping',
+        url: '/node/devices/ping',
         type: 'POST',
         headers: { 'x-auth': window.localStorage.getItem("authToken") },   
         data: { 'deviceId': deviceId }, 
@@ -104,7 +104,7 @@ function removeConfirm(){
   let remove = confirm("Are you sure you want to Remove this Device?");
   if(remove){
     $.ajax({
-        url: '/devices/remove',
+        url: '/node/devices/remove',
         type: 'DELETE',
         headers: { 'x-auth': window.localStorage.getItem("authToken") },   
         data: { 'deviceId': deviceId }, 

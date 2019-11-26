@@ -2,8 +2,8 @@ function sendSigninRequest() {
   let email = $('#email').val();
   let password = $('#password').val();
   
-  $.ajax({
-    url: '/users/signin',
+  $.ajax({ 
+    url: '/node/users/signin',
     type: 'POST',
     contentType: 'application/json',
     data: JSON.stringify({ email : email, password : password }), 

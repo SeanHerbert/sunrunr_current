@@ -17,7 +17,7 @@ function sendRegisterRequest() {
   }
   
   $.ajax({
-   url: '/users/register',
+   url: '/node/users/register',
    type: 'POST',
    contentType: 'application/json',
    data: JSON.stringify({email:email, fullName:fullName, password:password}),

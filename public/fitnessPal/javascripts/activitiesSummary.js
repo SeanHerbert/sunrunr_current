@@ -2,7 +2,7 @@ let map = null;
 
 function getActivitiesSummary() { 
   $.ajax({
-    url: '/activity/summary/30',
+    url: '/node/activity/summary/30',
     type: 'GET',
     headers: { 'x-auth': window.localStorage.getItem("authToken") },
     dataType: 'json'
@@ -37,44 +37,7 @@ function displayActivities(data, textSatus, jqXHR) {
 	
 	$('#activityList').html(listItems);
 	
-   // $("#main").show();
-
- //  If there's at least one pothole, draw the map
-   // let latitude = 32.2319;
-	// let longitude = -110.9501;
-   // let potholeReport = "No potholes have been reported in the last three days.";
-   
-	// if (data.potholes.length > 0) {
-	   // let latitude = data.potholes[data.potholes.length-1].latitude;
-	   // let longitude = data.potholes[data.potholes.length-1].longitude;
-		
- //     Add descriptive text of the pothole recently reported 
-      // potholeReport = data.potholes.length +
-	                  // " potholes have been reported in the last three days. The most recent pothole (shown above) was hit " +
-	                  // data.potholes[data.potholes.length-1].totalHits + " times.";
-   // }
-	    
-   // $("#potholeText").html(potholeReport);
- //  Create a map centered at the most recent pothole location
-   // let uluru = {lat: latitude, lng: longitude};
-   // let map = new google.maps.Map(document.getElementById('map'), {
-	   // zoom: 10,
-	   // center: uluru
-	// });
-	    
-//	Add markers for all potholes            
-   // for (let pothole of data.potholes) {
-      // uluru = {lat: pothole.latitude, lng: pothole.longitude};
-      // let marker = new google.maps.Marker({
-         // position: uluru,
-         // map: map,
-         // label: {
-            // text: "" + pothole.totalHits,
-            // color: 'black',
-            // fontSize: "10px"
-         // },
-      // });
-   // }                 
+          
 }
 
 function displayActivitiesError(jqXHR, textStatus, errorThrown) {

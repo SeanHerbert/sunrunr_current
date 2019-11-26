@@ -3,7 +3,7 @@ function getSamplesSummary() {
   let refNum = link.split("=")[1];
         console.log("sending get request to /activity/detail/")
   $.ajax({
-    url: '/activity/detail/'+refNum,
+    url: '/node/activity/detail/'+refNum,
     type: 'GET',
     headers: { 'x-auth': window.localStorage.getItem("authToken") },
     dataType: 'json'
