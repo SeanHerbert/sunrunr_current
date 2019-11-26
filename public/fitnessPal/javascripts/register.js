@@ -12,9 +12,9 @@ function sendRegisterRequest() {
   //   return;
   // }
 
-  if(regNotValid()){
-    return;
-  }
+  //if(regNotValid()){
+  //  return;
+ // }
   
   $.ajax({
    url: '/node/users/register',
