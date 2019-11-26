@@ -20,7 +20,7 @@ function accountInfoSuccess(data, textSatus, jqXHR) {
     $("#addDeviceForm").before("<li class='collection-item'>ID: " +
       device.deviceId + ", APIKEY: " + device.apikey + 
       " <button id='ping-" + device.deviceId + "' class='waves-effect waves-light btn'>Ping</button> " +
-      " </li>");
+      "<br><a class = 'red-text' href='#!' id='removeDevice'>Remove</a></li>");
     $("#ping-"+device.deviceId).click(function(event) {
       pingDevice(event, device.deviceId);
     });
@@ -40,7 +40,7 @@ function accountInfoError(jqXHR, textStatus, errorThrown) {
   } 
 }
 
-// Registers the specified device with the server.
+// Registers the specified device with the server
 function registerDevice() {
   $.ajax({
     url: '/devices/register',
@@ -55,7 +55,7 @@ function registerDevice() {
        $("#addDeviceForm").before("<li class='collection-item'>ID: " +
        $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
          " <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Ping</button> " +
-         "</li>");
+         "<br><a class = 'red-text' href='#!' id='removeDevice'>Remove</a></li>");
        $("#ping-"+$("#deviceId").val()).click(function(event) {
          pingDevice(event, device.deviceId);
        });
@@ -100,6 +100,28 @@ function hideAddDeviceForm() {
   $("#error").hide();
 }
 
+function removeConfirm(){
+  let remove = confirm("Are you sure you want to Remove this Device?");
+  if(remove){
+    $.ajax({
+        url: '/devices/remove',
+        type: 'DELETE',
+        headers: { 'x-auth': window.localStorage.getItem("authToken") },   
+        data: { 'deviceId': deviceId }, 
+        responseType: 'json',
+        success: function (data, textStatus, jqXHR) {
+            console.log("Removed.");
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            var response = JSON.parse(jqXHR.responseText);
+            $("#error").html("Error: " + response.message);
+            $("#error").show();
+        }
+    }); 
+
+  }
+}
+
 // Handle authentication on page load
 $(function() {
   // If there's no authToekn stored, redirect user to 
@@ -113,6 +135,7 @@ $(function() {
   
   // Register event listeners
   $("#addDevice").click(showAddDeviceForm);
+  $('#removeDevice').click(removeConfirm);
   $("#registerDevice").click(registerDevice);  
   $("#cancel").click(hideAddDeviceForm);  
 });

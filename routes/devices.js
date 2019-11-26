@@ -21,7 +21,6 @@ function getNewApikey() {
 
 // GET request return one or "all" devices registered and last time of contact.
 router.get('/status/:devid', function(req, res, next) {
-  console.log("sht");
   let deviceId = req.params.devid;
   let responseJson = { devices: [] };
 
@@ -49,7 +48,6 @@ router.get('/status/:devid', function(req, res, next) {
 });
 
 router.post('/register', function(req, res, next) {
-	console.log("1");
   let responseJson = {
     registered: false,
     message : "",
@@ -60,7 +58,6 @@ router.post('/register', function(req, res, next) {
   
   // Ensure the request includes the deviceId parameter
   if( !req.body.hasOwnProperty("deviceId")) {
-    console.log("2");
 
     responseJson.message = "Missing deviceId.";
     return res.status(400).json(responseJson);
@@ -70,20 +67,15 @@ router.post('/register', function(req, res, next) {
     
   // If authToken provided, use email in authToken 
   if (req.headers["x-auth"]) {
-	console.log("3");
 
     try {
-	console.log("4");
 
       let decodedToken = jwt.decode(req.headers["x-auth"], secret);
-console.log("5");
 
       email = decodedToken.email;
-console.log("6");
 
     }
     catch (ex) {
-console.log("7");
 
       responseJson.message = "Invalid authorization token.";
       return res.status(400).json(responseJson);
@@ -169,5 +161,77 @@ router.post('/ping', function(req, res, next) {
     responseJson.message = "Device ID " + req.body.deviceId + " pinged.";
     return res.status(200).json(responseJson);
 });
+
+
+router.delete('/remove',function(req,res,next){
+    let responseJson = {
+    removed: false,
+    message : "",
+    apikey : "none",
+    deviceId : "none"
+    };
+
+    // Ensure the request includes the deviceId parameter
+  if( !req.body.hasOwnProperty("deviceId")) {
+
+    responseJson.message = "Missing deviceId.";
+    return res.status(400).json(responseJson);
+  }
+
+  let email = "";
+    
+  // If authToken provided, use email in authToken 
+  if (req.headers["x-auth"]) {
+
+    try {
+
+      let decodedToken = jwt.decode(req.headers["x-auth"], secret);
+
+      email = decodedToken.email;
+
+    }
+    catch (ex) {
+
+      responseJson.message = "Invalid authorization token.";
+      return res.status(400).json(responseJson);
+    }
+  }
+
+  else {
+    // Ensure the request includes the email parameter
+    if( !req.body.hasOwnProperty("email")) {
+      responseJson.message = "Invalid authorization token or missing email address.";
+      return res.status(400).json(responseJson);
+    }
+    email = req.body.email;
+  }
+
+  Device.remove({ deviceId: req.deviceId}, function(err, removed){
+    if(err){
+      responseJson.message = err;
+      // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
+      return res.status(400).json(responseJson);
+    }
+    if(removed ==null){
+      responseJson.message = "device not removed";
+      // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
+      return res.status(400).json(responseJson);
+
+    }
+     else {
+          responseJson.removed = true;
+          responseJson.deviceId = req.body.deviceId;
+          responseJson.message = "Device ID " + req.body.deviceId + " was removed.";
+          return res.status(201).json(responseJson);
+        }
+  });
+  }
+  
+
+
+
+
+
+);
 
 module.exports = router;
