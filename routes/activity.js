@@ -341,7 +341,8 @@ router.get("/summary/:days", function(req, res) {
 router.get("/detail/:number", function(req, res) {
     //console.log("ID FROM QUEREY "+id);
         let responseJson = {
-	      samples: []
+	      samples: [],
+		type:""
     };
     if (authenticateRecentEndpoint) {
         var decodedToken = authenticateAuthToken(req);
@@ -368,7 +369,8 @@ router.get("/detail/:number", function(req, res) {
             return res.status(200).send(JSON.stringify(responseJson));
         }
         else { 
-            for (let a of activities) { 
+            for (let a of activities) {
+		responseJson.type = a.type;
                 for (let sample of a.samples){
                 responseJson.samples.push({
                           start:sample.start,

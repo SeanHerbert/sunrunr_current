@@ -55,8 +55,11 @@ router.post('/register', function(req, res, next) {
     deviceId : "none"
   };
   let deviceExists = false;
+
+
   
   // Ensure the request includes the deviceId parameter
+  console.log(typeof req.body.deviceId);
   if( !req.body.hasOwnProperty("deviceId")) {
 
     responseJson.message = "Missing deviceId.";
@@ -164,6 +167,7 @@ router.post('/ping', function(req, res, next) {
 
 
 router.delete('/remove',function(req,res,next){
+
     let responseJson = {
     removed: false,
     message : "",
@@ -171,13 +175,14 @@ router.delete('/remove',function(req,res,next){
     deviceId : "none"
     };
 
-    // Ensure the request includes the deviceId parameter
-  if( !req.body.hasOwnProperty("deviceId")) {
-
+//console.log(req.body.deviceId!==null); 
+ if( req.body.deviceId==null || req.body.deviceId =='') {
+    console.log("GETTING INTO DEVICE ID");
     responseJson.message = "Missing deviceId.";
     return res.status(400).json(responseJson);
   }
-
+    console.log("here");
+    
   let email = "";
     
   // If authToken provided, use email in authToken 
@@ -225,13 +230,6 @@ router.delete('/remove',function(req,res,next){
           return res.status(201).json(responseJson);
         }
   });
-  }
-  
-
-
-
-
-
-);
+  });
 
 module.exports = router;

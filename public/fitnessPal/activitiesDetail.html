@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>FitnessPal - Activities Summary</title>
+    <title>FitnessPal - Activities Detail</title>
 
          <!-- Import jQuery -->
          <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
@@ -48,7 +48,10 @@
       <div class="col s12 m6">
         <div class="card blue-grey ">
           <div class="card-content teal-text">
-            <ul class="collection with-header teal lighten-2" id = "activityDetail" >
+		<h4 class="collection-header grey lighten-5" id="activityType"></h4>
+            	<label for'drop'>Change Activity Type</label>
+		<select id="drop"></select>
+		<ul class="collection with-header teal lighten-2" id = "activityDetail" >
             </ul>
           </div>
           <!-- <div class="card-panel blue-text" id="ServerResponse" style="display: none"></div> -->

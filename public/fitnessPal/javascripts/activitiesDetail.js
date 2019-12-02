@@ -13,10 +13,21 @@ function getSamplesSummary() {
 }
 
 function displaySamples(data, textSatus, jqXHR) {
-        
-  var listItems = '<li class="collection-header grey lighten-4" ><h4>Activity Detail</h4></li>';
+        console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+	console.log(data);
+	var type = "undefined"
+	if (data.type !=""){
+		type = data.type;
+	}
+	var activityType = `Activity Detail ${type}`
+	var drop = `<option value='""' disabled selected>Change Activity Type</option>
+        	<option value='Running'>Running</option>
+        	<option value='Walking'>Walking</option>
+          	<option value='Biking'>Biking</option>`;
+	$('#activityType').html(activityType);
+	$('#drop').html(drop);
   
-
+	var listItems="";
   for (let sample of data.samples){
                                listItems+=
                 `<li class="collection-item teal lighten-5">
@@ -52,6 +63,18 @@ $(function() {
    if (!window.localStorage.getItem("authToken")) {
       window.location.replace("index.html");
    }
-   getSamplesSummary();
+	getSamplesSummary();
+	document.getElementById('dropdown2').addEventListener('input', function (event) {
+                let link = window.location.href;
+                let refNum = link.split("=")[1];
+                console.log("sending get request to /activity/detail/refNum/Value");
+                console.log("Event Listener this.value return= "+this.value);
+                /*$.ajax({
+                        url: '/node/activity/detail/'+refNum+'/'+this.value,
+                        type: 'GET',
+                        headers: { 'x-auth': window.localStorage.getItem("authToken") },
+                        dataType: 'json'
+                }).done(displaySamples).fail(displaySamplesError);*/
+	}, false);
         console.log("finished request");
 });

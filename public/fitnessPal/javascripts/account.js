@@ -20,9 +20,12 @@ function accountInfoSuccess(data, textSatus, jqXHR) {
     $("#addDeviceForm").before("<li class='collection-item'>ID: " +
       device.deviceId + ", APIKEY: " + device.apikey + 
       " <button id='ping-" + device.deviceId + "' class='waves-effect waves-light btn'>Ping</button> " +
-      "<br><a class = 'red-text' href='#!' id='removeDevice'>Remove</a></li>");
+      "<br><br><button id ='remove-" + device.deviceId + "' class = 'red-text'>Remove</button></li>");
     $("#ping-"+device.deviceId).click(function(event) {
       pingDevice(event, device.deviceId);
+    });
+    $("#remove-"+device.deviceId).click(function(event) {
+      removeConfirm(event, device.deviceId);
     });
   }
 }
@@ -31,8 +34,9 @@ function accountInfoError(jqXHR, textStatus, errorThrown) {
   // If authentication error, delete the authToken 
   // redirect user to sign-in page (which is index.html)
   if( jqXHR.status === 401 ) {
+    alert("auth error");
     window.localStorage.removeItem("authToken");
-    window.location.replace("index.html");
+    window.location.replace("https://seanh-webauthn.duckdns.org/index.html");
   } 
   else {
     $("#error").html("Error: " + status.message);
@@ -55,10 +59,13 @@ function registerDevice() {
        $("#addDeviceForm").before("<li class='collection-item'>ID: " +
        $("#deviceId").val() + ", APIKEY: " + data["apikey"] + 
          " <button id='ping-" + $("#deviceId").val() + "' class='waves-effect waves-light btn'>Ping</button> " +
-         "<br><a class = 'red-text' href='#!' id='removeDevice'>Remove</a></li>");
+         "<br><button id ='remove-" + $("#deviceId").val() + "' class = 'red-text'>Remove</button></li>");
        $("#ping-"+$("#deviceId").val()).click(function(event) {
-         pingDevice(event, device.deviceId);
+         pingDevice(event, data.deviceId);
        });
+       $("#remove-"+$("#deviceId").val()).click(function(event) {
+      removeConfirm(event, data.deviceId);
+    });
        hideAddDeviceForm();
      })
      .fail(function(jqXHR, textStatus, errorThrown) {
@@ -100,7 +107,7 @@ function hideAddDeviceForm() {
   $("#error").hide();
 }
 
-function removeConfirm(){
+function removeConfirm(event,deviceId){
   let remove = confirm("Are you sure you want to Remove this Device?");
   if(remove){
     $.ajax({
@@ -124,6 +131,7 @@ function removeConfirm(){
 
 // Handle authentication on page load
 $(function() {
+   alert(window.localStorage.getItem("authToken"));
   // If there's no authToekn stored, redirect user to 
   // the sign-in page (which is index.html)
   if (!window.localStorage.getItem("authToken")) {
@@ -135,7 +143,7 @@ $(function() {
   
   // Register event listeners
   $("#addDevice").click(showAddDeviceForm);
-  $('#removeDevice').click(removeConfirm);
+  //$("span").click(removeConfirm);
   $("#registerDevice").click(registerDevice);  
   $("#cancel").click(hideAddDeviceForm);  
 });

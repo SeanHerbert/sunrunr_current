@@ -35,6 +35,12 @@ router.post('/signin', function(req, res, next) {
   });
 });
 
+
+router.post('/token', function (req,res,next){
+       var authToken = jwt.encode({email: req.body.email}, secret);
+       res.status(201).json({success:true, authToken: authToken});  
+});
+
 /* Register a new user */
 router.post('/register', function(req, res, next) {
    
@@ -64,6 +70,7 @@ router.post('/register', function(req, res, next) {
 router.get("/account" , function(req, res) {
    // Check for authentication token in x-auth header
    if (!req.headers["x-auth"]) {
+      console.log("no auth token");
       return res.status(401).json({success: false, message: "No authentication token"});
    }
    
@@ -72,39 +79,47 @@ router.get("/account" , function(req, res) {
    try {
       var decodedToken = jwt.decode(authToken, secret);
       var userStatus = {};
+	
+      $.ajax({
+        url: '/reg_sign_in_controller.php',
+        type: 'POST',
+        contentType: 'application/json',
+        data: { email : decodedToken.email, acct: true}, 
+        dataType: 'json'
+      })
+      .done(getAcctInfoSuccess)
+      .fail(getAcctInfoError);
+    }
+    catch(ex){
+        return res.status(401).json({success: false, message: "Invalid authentication token."});  
+    }
       
-      User.findOne({email: decodedToken.email}, function(err, user) {
-         if(err) {
-            return res.status(400).json({success: false, message: "User does not exist."});
-         }
-         else {
-            userStatus['success'] = true;
-            userStatus['email'] = user.email;
-            userStatus['fullName'] = user.fullName;
-            userStatus['lastAccess'] = user.lastAccess;
+      function getAcctInfoSuccess(data,textStatus,jqXHR){
+          userStatus['success'] = true;
+          userStatus['email'] = data.email;
+          userStatus['fullName'] = data.fullName;
+          userStatus['lastAccess'] = data.lastAccess;
+
+
+          Device.find({ userEmail : decodedToken.email}, function(err, devices) {
+            if (!err) {
+               // Construct device list
+               let deviceList = []; 
+               for (device of devices) {
+                 deviceList.push({ 
+                       deviceId: device.deviceId,
+                       apikey: device.apikey,
+                 });
+               }
+               userStatus['devices'] = deviceList;
+            }
             
-            // Find devices based on decoded token
-		      Device.find({ userEmail : decodedToken.email}, function(err, devices) {
-			      if (!err) {
-			         // Construct device list
-			         let deviceList = []; 
-			         for (device of devices) {
-				         deviceList.push({ 
-				               deviceId: device.deviceId,
-				               apikey: device.apikey,
-				         });
-			         }
-			         userStatus['devices'] = deviceList;
-			      }
-			      
                return res.status(200).json(userStatus);            
-		      });
-         }
-      });
-   }
-   catch (ex) {
-      return res.status(401).json({success: false, message: "Invalid authentication token."});
-   }
+          });
+
+      }
+      
+   
 });
 
 
