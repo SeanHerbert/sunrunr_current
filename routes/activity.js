@@ -342,7 +342,8 @@ router.get("/detail/:number", function(req, res) {
     //console.log("ID FROM QUEREY "+id);
         let responseJson = {
 	      samples: [],
-		type:""
+		type:"",
+		activity: ""
     };
     if (authenticateRecentEndpoint) {
         var decodedToken = authenticateAuthToken(req);
@@ -353,7 +354,7 @@ router.get("/detail/:number", function(req, res) {
         }
     }
     // Find all potholes reported in the spcified number of days
-    let activitiesQuery = Activity.find({
+    let activitiesQuery = Activity.findOne({
       "id":Number(req.params.number),
       "userEmail": decodedToken.email
     });
@@ -362,16 +363,17 @@ router.get("/detail/:number", function(req, res) {
         //console.log("Number:"+req.params.number+" userEmail:"+decodedToken.email);
         //console.log(JSON.stringify(activitesQuery));
         //console.log("Before activitesQuerey.exec"); 
-    activitiesQuery.exec({}, function(err, activities) {
+    activitiesQuery.exec({}, function(err, activity) {
         if (err) {
             responseJson.success = false;
             responseJson.message = "Error accessing db.";
             return res.status(200).send(JSON.stringify(responseJson));
         }
         else { 
-            for (let a of activities) {
-		responseJson.type = a.type;
-                for (let sample of a.samples){
+        	responseJson.activity = activity;
+     //       for (let a of activities) {
+		responseJson.type = activity.type;
+                for (let sample of activity.samples){
                 responseJson.samples.push({
                           start:sample.start,
                           longitude:sample.longitude,
@@ -380,7 +382,7 @@ router.get("/detail/:number", function(req, res) {
                           uv:sample.uv
                 });
                 }
-                if(a.samples.length == 0){
+                if(activity.samples.length == 0){
                         responseJson.samples.push({
                                 start:0,
                                 longitude:0,
@@ -390,7 +392,7 @@ router.get("/detail/:number", function(req, res) {
 
                         });
                 }
-            }
+           // }
                            return res.status(200).send(JSON.stringify(responseJson));
         }
     });

@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
 
     <link href="/node/fitnessPal/stylesheets/fitnessPal.css" rel="stylesheet">
     <script src="/node/fitnessPal/javascripts/signout.js"></script>
@@ -27,8 +29,8 @@
     <!-- Dropdown Structure -->
     <ul id='dropdown1' class='dropdown-content'>
       <li><a href="account.html">Home</a></li>
-      <li><a href="summary.html">Summary</a></li>
-		  <li><a href = "activtiesSummary.html"</a>activities Summary</li>
+      <li><a href = "activtiesSummary.html">activities Summary</a></li>
+      <li><a href="forecast.html">Weather Forecast</a></li>
       <li class="divider"></li>
       <li><a href="#!" id="signout">Sign out</a></li>
 
@@ -47,32 +49,50 @@
     <div class="row">
       <div class="col s12 m6">
         <div class="card blue-grey ">
+  <div class="card-content teal-text">
+        <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+  </div>
+  </div>
+     <div class="card blue-grey "> 
           <div class="card-content teal-text">
-		<h4 class="collection-header grey lighten-5" id="activityType"></h4>
-            	<label for'drop'>Change Activity Type</label>
-		<select id="drop"></select>
-		<ul class="collection with-header teal lighten-2" id = "activityDetail" >
-            </ul>
+           <ul class="collection with-header teal lighten-2" id = "activityList" >
+           </ul>
+            
           </div>
           <!-- <div class="card-panel blue-text" id="ServerResponse" style="display: none"></div> -->
         </div>
       </div>
-    </div>
-    <div class = "row">
-      <div class="s12 m6 l3 center"> 
-
-        <!-- Dropdown Trigger -->
-        <a class='dropdown-trigger btn' href='#' data-target='dropdown2'>Change Activity Type</a>
-
-        <!-- Dropdown Structure -->
-        <ul id='dropdown2' class='dropdown-content'>
-          <li><a href="#!">one</a></li>
-          <li><a href="#!">two</a></li>
-          <li class="divider" tabindex="-1"></li>
-          <li><a href="#!">three</a></li>
-          <li><a href="#!"><i class="material-icons">view_module</i>four</a></li>
-          <li><a href="#!"><i class="material-icons">cloud</i>five</a></li>
-        </ul>
+      <div class="col s12 m6 l5">
+        <div class="card blue-grey ">
+          <div class="card-content black-text center">
+            <ul class="collection with-header teal lighten-2" >
+              <li class="collection-header grey lighten-5" ><h3>Calories Burned</h3></li>
+              <li class="collection-item teal lighten" >
+                <div class = "white-text"><h4 id = "cals"></h4></div></li>
+           </ul>
+          </div>
+        </div>
+         <legend><b>Change Activity Type</b></legend>
+     <form action="#">
+      <fieldset>
+      <label>
+        <input class="with-gap" name="group1" type="radio" id = 'w' value = "walking" />
+        <span>Walking</span>
+      </label>
+    
+      <label>
+        <input class="with-gap" name="group1" type="radio" id = 'r' value = "running" />
+        <span>Running</span>
+      </label>
+   
+      <label>
+        <input class="with-gap" name="group1" type="radio" id = 'b' value = "biking"  />
+        <span>Biking</span>
+      </label>
+      </fieldset>
+      
+    
+  </form>
       </div>
     </div>
   </body>

@@ -5,6 +5,18 @@ let Device = require("../models/device");
 let fs = require('fs');
 let bcrypt = require("bcryptjs");
 let jwt = require("jwt-simple");
+let request = require('request');
+
+
+var jsdom = require("jsdom");
+const { JSDOM } = jsdom;
+const { window } = new JSDOM();
+const { document } = (new JSDOM('')).window;
+global.document = document;
+
+var $ = jQuery = require('jquery')(window);
+
+
 
 /* Authenticate user */
 var secret = fs.readFileSync(__dirname + '/../../jwtkey').toString();
@@ -67,41 +79,57 @@ router.post('/register', function(req, res, next) {
    });   
 });
 
+router.get('/logins', function (req,res,next){
+        if (!req.headers["x-auth"]) {
+          
+          return res.status(401).json({success: false, message: "No authentication token"});
+       }
+      // try{
+         var authToken = req.headers["x-auth"]; 
+         var decodedToken = jwt.decode(authToken, secret);
+         var email = decodedToken.email;
+         request.post({
+            headers: {'content-type' : 'application/json'},
+            url: 'https://seanh-webauthn.duckdns.org/reg_sign_in_controller.php', 
+            form: {"email":email,"logs":true}
+          }, function(err,response,logins){
+	    // console.log("first thing in logins request callback")
+            // console.log("login data: "+logins[0]);
+             logins = JSON.parse(logins);
+             return res.status(200).json(logins); 
+          }); 
+       // }
+       // catch(ex){
+       //   console.log("invalid token");
+       // }
+});
+
 router.get("/account" , function(req, res) {
    // Check for authentication token in x-auth header
-   if (!req.headers["x-auth"]) {
-      console.log("no auth token");
+      if (!req.headers["x-auth"]) {
+      
       return res.status(401).json({success: false, message: "No authentication token"});
    }
-   
-   var authToken = req.headers["x-auth"];
-   
-   try {
-      var decodedToken = jwt.decode(authToken, secret);
-      var userStatus = {};
-	
-      $.ajax({
-        url: '/reg_sign_in_controller.php',
-        type: 'POST',
-        contentType: 'application/json',
-        data: { email : decodedToken.email, acct: true}, 
-        dataType: 'json'
-      })
-      .done(getAcctInfoSuccess)
-      .fail(getAcctInfoError);
-    }
-    catch(ex){
-        return res.status(401).json({success: false, message: "Invalid authentication token."});  
-    }
-      
-      function getAcctInfoSuccess(data,textStatus,jqXHR){
-          userStatus['success'] = true;
-          userStatus['email'] = data.email;
-          userStatus['fullName'] = data.fullName;
-          userStatus['lastAccess'] = data.lastAccess;
 
-
-          Device.find({ userEmail : decodedToken.email}, function(err, devices) {
+   try{
+    var authToken = req.headers["x-auth"]; 
+    var decodedToken = jwt.decode(authToken, secret);
+    var email = decodedToken.email;
+    userStatus ={};
+    data = {"email":email,"acct":true};
+    request.post({
+    headers: {'content-type' : 'application/json'},
+    url: 'https://seanh-webauthn.duckdns.org/reg_sign_in_controller.php', 
+    form: {"email":email,"acct":true},
+    //json:true
+  }, function(err,result,user){
+     user = JSON.parse(user);
+     userStatus['success'] = true;
+     userStatus['email'] = user.email;
+     userStatus['fullname'] = user.fullName;
+     userStatus['lastaccess'] = user.lastAccess;
+     
+     Device.find({ userEmail : decodedToken.email}, function(err, devices) {
             if (!err) {
                // Construct device list
                let deviceList = []; 
@@ -117,7 +145,22 @@ router.get("/account" , function(req, res) {
                return res.status(200).json(userStatus);            
           });
 
-      }
+  
+    }); 
+
+  }
+
+ catch (ex) {
+      return res.status(401).json({success: false, message: "Invalid authentication token."});
+   }
+    
+
+   
+    
+
+
+   
+  
       
    
 });

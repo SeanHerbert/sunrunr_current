@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link href="/node/fitnessPal/stylesheets/fitnessPal.css" rel="stylesheet">
+  <!-- Import jQuery -->
+   <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <!--Import Google Icon Font-->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!--Import materialize.css-->
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="/node/fitnessPal/javascripts/forecast.js"></script>
+  
+
+  <!--Let browser know website is optimized for mobile-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
+<body>
+  <ul id='dropdown1' class='dropdown-content'>
+    <li><a href="account.html">Home</a></li>
+    <li><a href="activtiesSummary.html">Activities Summary</a></li>
+    <li class="divider"></li>
+    <li><a href="#!" id="signout">Sign out</a></li>
+  </ul>
+  <nav>
+    <div class="nav-wrapper blue-grey darken-2">
+      <a href="account.html" class="brand-logo left"><img id="logo" src="images/logo.png"><span id="name">FintessPal</span></a>
+      <ul class="right ">
+        <!-- Dropdown Trigger -->
+           <li><a class='dropdown-trigger btn' href='#' data-target='dropdown1'><i class="material-icons">more_vert</i></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <ul class="sidenav" id="mobile-demo">
+    <li><a href="forecast3.html">3-day</a></li>
+        <li><a href="forecast10.html">10-day</a></li>
+        <li><a href="alerts.html">Alerts</a></li>
+  </ul>
+
+  <div class="row">
+    <div class="col s10 offset-s1">
+      <div class="row">
+        <div class="col s10 m3">
+          <div class="card  blue-grey lighten-5">
+            <div class="card-image">
+              <img class = "blue-grey" id ='day1'>
+            </div>
+            <div class="card-content">
+              <p class="blue-text">TODAY</p>
+              <p id ="hl1"><p>
+            </div>
+            <div class="card-action">
+              <p id = "desc1"></p>    
+            </div>
+          </div>
+        </div>
+
+        <div class="col s10 m3">
+          <div class="card  blue-grey lighten-5">
+            <div class="card-image">
+              <img class = "blue-grey" id ='day2' >
+            </div>
+            <div class="card-content">
+              <p class="blue-text">FRIDAY</p>
+              <p id ="hl2"><p>
+            </div>
+            <div class="card-action">
+              <p id = "desc2"></p>    
+            </div>
+          </div>
+        </div>
+
+        <div class="col s10 m3">
+          <div class="card  blue-grey lighten-5">
+            <div class="card-image">
+              <img class = "blue-grey"  id ='day3' >
+            </div>
+            <div class="card-content">
+              <p class="blue-text">SATURDAY</p>
+              <p id ="hl3"><p>
+            </div>
+            <div class="card-action">
+              <p id = "desc3"></p>    
+            </div>
+          </div>
+        </div>
+
+        <div class="col s10 m3">
+          <div class="card  blue-grey lighten-5">
+            <div class="card-image">
+              <img class = "blue-grey" id ='day4'>
+            </div>
+            <div class="card-content">
+              <p class="blue-text">SUNDAY</p>
+              <p id ="hl4"><p>
+            </div>
+            <div class="card-action">
+              <p id = "desc4"></p>    
+            </div>
+          </div>
+        </div>
+        <div class="col s10 m3">
+          <div class="card  blue-grey lighten-5">
+            <div class="card-image">
+              <img class = "blue-grey" id ='day5' >
+            </div>
+            <div class="card-content">
+              <p class="blue-text">MONDAY</p>
+              <p id ="hl5"><p>
+            </div>
+            <div class="card-action">
+              <p id = "desc5"></p>    
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="page-footer blue-grey darken-2">
+    <div class="footer-copyright">
+      <div class="container center">
+        
+      </div>
+    </div>
+  </footer>
+</body>
+
+<script>
+
+    $('.dropdown-trigger').dropdown();
+  
+  document.addEventListener('DOMContentLoaded', function() {
+  var elems = document.querySelectorAll('.sidenav');
+  var instances = M.Sidenav.init(elems);
+});
+</script>
+
+</html> 

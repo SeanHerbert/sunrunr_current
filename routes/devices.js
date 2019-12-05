@@ -167,22 +167,24 @@ router.post('/ping', function(req, res, next) {
 
 
 router.delete('/remove',function(req,res,next){
-
+    console.log("inside endpoint");
     let responseJson = {
     removed: false,
     message : "",
     apikey : "none",
-    deviceId : "none"
+    deviceId : "none",
+    data: "none"
     };
 
-//console.log(req.body.deviceId!==null); 
- if( req.body.deviceId==null || req.body.deviceId =='') {
-    console.log("GETTING INTO DEVICE ID");
+   console.log(typeof(req.body.deviceId)); 
+  if(!req.body.hasOwnProperty("deviceId")) {
+ //if( req.body.deviceId==null || req.body.deviceId =='') { #this works
+    
     responseJson.message = "Missing deviceId.";
     return res.status(400).json(responseJson);
   }
-    console.log("here");
-    
+   
+   
   let email = "";
     
   // If authToken provided, use email in authToken 
@@ -201,8 +203,9 @@ router.delete('/remove',function(req,res,next){
       return res.status(400).json(responseJson);
     }
   }
-
+  
   else {
+    console.log("got to line 205 in device.js. Meaning req has devID and email.");
     // Ensure the request includes the email parameter
     if( !req.body.hasOwnProperty("email")) {
       responseJson.message = "Invalid authorization token or missing email address.";
@@ -211,24 +214,26 @@ router.delete('/remove',function(req,res,next){
     email = req.body.email;
   }
 
-  Device.remove({ deviceId: req.deviceId}, function(err, removed){
+  Device.remove({ deviceId: req.body.deviceId}, function(err, removed){
     if(err){
-      responseJson.message = err;
+      
+      responseJson.message = "there was an errror";
       // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
       return res.status(400).json(responseJson);
     }
-    if(removed ==null){
-      responseJson.message = "device not removed";
-      // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
-      return res.status(400).json(responseJson);
+    // if(removed ==null){
+    //   responseJson.message = "device not removed";
+    //   // This following is equivalent to: res.status(400).send(JSON.stringify(responseJson));
+    //   return res.status(400).json(responseJson);
 
-    }
-     else {
+    // }
+    //  else {
           responseJson.removed = true;
           responseJson.deviceId = req.body.deviceId;
+          responseJson.data = removed;
           responseJson.message = "Device ID " + req.body.deviceId + " was removed.";
           return res.status(201).json(responseJson);
-        }
+       // }
   });
   });
 
