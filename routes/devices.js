@@ -47,7 +47,7 @@ router.post('/thresh', function(req, res, next) {
                     res.status(200).json(//{
                         //success: true,
                         //threshold: 
-			user.threshold
+      user.threshold
                     //}
 );
                 }
@@ -144,9 +144,9 @@ router.post('/register', function(req, res, next) {
     }
     else {
       // Get a new apikey
-	   deviceApikey = getNewApikey();
-	    
-	    // Create a new device with specified id, user email, and randomly generated apikey.
+     deviceApikey = getNewApikey();
+      
+      // Create a new device with specified id, user email, and randomly generated apikey.
       let newDevice = new Device({
         deviceId: req.body.deviceId,
         userEmail: email,
@@ -198,8 +198,8 @@ router.post('/ping', function(req, res, next) {
        method: "POST",
        uri: "https://api.particle.io/v1/devices/" + req.body.deviceId + "/pingDevice",
        form: {
-	       access_token : particleAccessToken,
-	       args: "" + (Math.floor(Math.random() * 11) + 1)
+         access_token : particleAccessToken,
+         args: "" + (Math.floor(Math.random() * 11) + 1)
         }
     });
             
@@ -211,6 +211,8 @@ router.post('/ping', function(req, res, next) {
 
 router.delete('/remove',function(req,res,next){
     console.log("inside endpoint");
+
+    //initialize response data 
     let responseJson = {
     removed: false,
     message : "",
@@ -219,15 +221,15 @@ router.delete('/remove',function(req,res,next){
     data: "none"
     };
 
-   console.log(typeof(req.body.deviceId)); 
+
+  //check req has deviceId 
   if(!req.body.hasOwnProperty("deviceId")) {
- //if( req.body.deviceId==null || req.body.deviceId =='') { #this works
     
     responseJson.message = "Missing deviceId.";
     return res.status(400).json(responseJson);
   }
-   
-   
+     console.log("devIdFollows");  
+  console.log(req.body.deviceId); 
   let email = "";
     
   // If authToken provided, use email in authToken 
@@ -248,7 +250,6 @@ router.delete('/remove',function(req,res,next){
   }
   
   else {
-    console.log("got to line 205 in device.js. Meaning req has devID and email.");
     // Ensure the request includes the email parameter
     if( !req.body.hasOwnProperty("email")) {
       responseJson.message = "Invalid authorization token or missing email address.";

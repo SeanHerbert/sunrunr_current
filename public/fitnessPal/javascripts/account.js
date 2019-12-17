@@ -29,11 +29,9 @@ function accountInfoSuccess(data, textSatus, jqXHR) {
       device.deviceId + "<br><b>APIKEY: </b>" + device.apikey + 
       
       "<br><button id ='remove-" + device.deviceId + "' class = 'blue-grey waves-effect waves-dark btn-small red-text lighten-4'>Remove</button></li>");
-    $("#ping-"+device.deviceId).click(function(event) {
-      pingDevice(event, device.deviceId);
-    });
+    console.log(device.deviceId);
     $("#remove-"+device.deviceId).click(function(event) {
-	removeConfirm(event, device.deviceId);
+        removeConfirm(event, device.deviceId);
     });
   }
 }
@@ -67,11 +65,9 @@ function registerDevice() {
        $("#deviceId").val() + "<br><b>APIKEY: </b>" + data["apikey"] + 
         
          "<br><button id ='remove-" + $("#deviceId").val() + "' class = 'blue-grey waves-effect waves-dark btn-small red-text lighten-4'>Remove</button></li>");
-       $("#ping-"+$("#deviceId").val()).click(function(event) {
-         pingDevice(event, data.deviceId);
-       });
-       $("#remove-"+$("#deviceId").val()).click(function(event) {
-      removeConfirm(event, data.deviceId);
+      
+       $("#remove-"+data.deviceId).click(function(event) {
+      removeConfirm(event, data.deviceId); //was data.deviceId 
     });
        hideAddDeviceForm();
      })
@@ -180,13 +176,14 @@ function hideAddDeviceForm() {
 }
 
 function removeConfirm(event,deviceId){
-  let remove = confirm("Are you sure you want to Remove this Device?");
+  let devi = deviceId;
+  let remove = confirm("Are you sure you want to Remove Device "+devi+"?");
   if(remove){
     $.ajax({
         url: '/node/devices/remove',
         type: 'DELETE',
         headers: { 'x-auth': window.localStorage.getItem("authToken") },   
-        data: JSON.stringify({ 'deviceId': deviceId }), 
+        data: JSON.stringify({ 'deviceId': devi }), 
         responseType: 'json',
   contentType: 'application/json',
         success: function (data, textStatus, jqXHR) {
@@ -484,17 +481,27 @@ if(data.newToken){
 
 console.log("~~~~~~~~~~~~~~~~~~~~~");
 console.log(window.localStorage.getItem('authToken'));
+
+
+
+
+
+
+
 $('#big-papa').html(deets);
-if(data.email){
-	$('#email').html(data.email);
+
+if(newEmail.replace(/\s/g, '').length){
+    $('#email').html(newEmail);   
 }
-if(data.fullName){
-$('#fullName').html(data.fullName);
-}
-$("#success").show();
-$("#msgShow").slideDown();
-setTimeout(function(){$("#msgShow").slideUp();},3000);
-setTimeout(function(){$("#success").hide();},3000);
+  if(newName.replace(/\s/g, '').length){
+     $('#fullName').html(newName); 
+  }
+
+let umsg = "<p>Acount information updated successfully!</p>"
+$('#umsg').html(umsg);
+$("#um").slideDown();
+setTimeout(function(){$("#um").slideUp();},3000);
+
 console.log(data);
 console.log("Deets");
 console.log(deets);
@@ -502,11 +509,10 @@ console.log(deets);
 
 function updateError(data,textStatus,jqXHR){
 //show fail message for second
-$("#fail").html(data.msg);
-$("#fail").show();
-$("#msgShow").slideDown();
-setTimeout(function(){$("#msgShow").slideUp();},3000);
-setTimeout(function(){$("#fail").hide();},3000);
+let umsg = "<p class = 'red-text'>Acount information not updated. Contact Support.</p>"
+$('#umsg').html(umsg);
+$("#um").slideDown();
+setTimeout(function(){$("#um").slideUp();},3000);
 $('#big-papa').html(deets);
 }
 
@@ -542,4 +548,5 @@ $(function() {
   $('#updateInfo').click(showUpdateForm);
   $('#thresh').click(showThreshForm);
   $('#currThresh').hide();
+  $('#error_d').hide()
 });

@@ -61,9 +61,9 @@
 				<li class="collection-item">Email: <span id="email"></span></li>
 				<li class="collection-item">Name: <span id="fullName"></span></li>
 				<li class="collection-item">Last Access: <span id="lastAccess"></span></li>
-				<li class="collection-item" id="msgShow"><span class="green-text" id="success">Successfully updated account information</span>
-				<span class="red-text" id="fail"></span></li>
+				
 				<li class="collection-item"><button  id="updateInfo" class="waves-effect waves-light btn">Update Information</button> </li>
+				<li id = "um" class="collection-item"><span id="umsg"></span></li>
 			</ul>
 			</div>
 		</div>
@@ -80,6 +80,7 @@
 					<button id="cancel" class="waves-effect waves-light btn">Cancel</button> 
 				</li>
 				<li class="collection-item" id="addDeviceControl"><button id="addDevice" class="waves-effect waves-light btn"> Add Device</button></li>
+				<li class="collection-item red-text" id = "error_d"></li>
 			</ul>
 		</div>
 	</div>
@@ -106,7 +107,7 @@
 			</div>
 		</div>
 		
-	<div class='red-text text-darken-2' id="error_d"></div>
+	
 		
 	
 </div>
@@ -116,6 +117,7 @@
   <!-- Initialize dropdown menu in materialize -->
   <script>
     $('.dropdown-trigger').dropdown();
+   
   </script>
 
 </html>

@@ -91,10 +91,14 @@ router.post('/signin', function(req, res, next) {
 
 
 router.post('/update', function(req, res, next) {
+
+  //check for authtoken
   if (!req.headers["x-auth"]) {
           
           return res.status(401).json({success: false, message: "No authentication token"});
        }
+
+  //check for params
   if(!req.body.hasOwnProperty('e')){
       return res.status(400).json({success: false, message: "missing email"});  
   }
@@ -104,68 +108,100 @@ router.post('/update', function(req, res, next) {
   if(!req.body.hasOwnProperty('p')){
       return res.status(400).json({success: false, message: "missing password"});  
   }
+
+  //set query params
   var em =req.body.e;
   var na = req.body.n;
   var pw = req.body.p;
 
   try{
+    //decode tokenized email for update query
     var authToken = req.headers["x-auth"]; 
     var decodedToken = jwt.decode(authToken, secret);
     var t_email = decodedToken.email;
+
+
+
+    //find use associated with that email
     User.findOne({email: t_email}, function(err, user) {
+    //if error return
     if (err) {
        res.status(401).json({success : false, message : "Can't connect to DB."});         
     }
+
+    //user not found
     else if(!user) {
        res.status(401).json({success : false, message : "user no existe!."});         
     }
+
+    //set query params
     else {
-      //update user infor
+      //initialize  query 
       query = {};
+
+      //assign email to query if email non-whitespace 
       if(em.replace(/\s/g, '').length){
         query["email"] = em;
         
         }
+
+      //assign name to query if non-whitespace   
       if(na.replace(/\s/g, '').length){
         query["fullName"] = na;
         }
+
+      //hash password if non-whitespace 
       if(pw.replace(/\s/g, '').length){
         //hash it, store it 
         bcrypt.hash(pw, 10, function(err, hash) {
+            //if error hashing return
             if (err) {
                res.status(401).json({success : false, message : "not authorized"});         
             }
-            else {
 
+
+            else {
+              //assign query password hash for update 
               query["passwordHash"] = hash;
+
+              //stringify query
               var jsonQuery = JSON.stringify(query);
               jsonQuery = JSON.parse(jsonQuery);
               
+              //update user with tokenized email and query 
               User.update({email:t_email},{$set:jsonQuery},function(err,result){
+
+                  // if error return 
                   if(err){
                     res.status(401).json({success : false, message : "couldn't update user. but inside bcrpyt hash"});
                   }
                   else{
+                    //if email in query update it in all activities, associated with the update paramter of tokenized email 
                     if(query["email"]){
+
+                      //stringify query 
                       query2 = JSON.stringify({userEmail:query["email"]});
                       query2 = JSON.parse(query2);
                       console.log(query2);
+                      //update all activites with thte new eeamil 
                       Activity.updateMany({userEmail:t_email},{$set:query2},function(err1,res1){
+                          //if error return 
                           if(err){
                               res.status(400).json({success : false, message : "porblem with updating activites"});  
                           }
                           else{
-			     var newToken= jwt.encode({email:query["email"]},secret);
+                             //if activites updated, update devices as well 
                              Device.updateMany({userEmail:t_email},{$set:query2},function(err2,res2){
+                          //if error return 
                           if(err){
                               res.status(400).json({success : false, message : "porblem with updating devices"});  
                           }
-                          else if(query["fullName"]){
-			    res.status(201).json({email:em,fullName:na,success:true,message:"updated email throughout entire db",userRes:result,activityRes:res1,devRes:res2,newToken:newToken});
-			  }
-			  else{
+
+                          else{
+                            //create new authToken for with new email if everything was successful. 
+                            //Send it to be set in local storage client side so the user wont be kickced out
                             var newToken = jwt.encode({email: query["email"]}, secret);
-                            res.status(201).json({email:em,success : true, message:"updated email throughout entire db", userRes : result, activityRes: res1, devRes: res2, newToken: newToken});
+                            res.status(201).json({success : true, message:"updated email throughout entire db", userRes : result, activityRes: res1, devRes: res2, newToken: newToken});
                           }
                               
                           }
@@ -179,10 +215,8 @@ router.post('/update', function(req, res, next) {
 
                       
                     }
-                    else{
-			query["success"] = true;
-			query["message"]=result;
-			res.status(201).json(query);}
+                    //no email present, password successfully updated 
+                    else{res.status(201).json({success : true, message : result});}
                     
                   }
 
@@ -196,36 +230,45 @@ router.post('/update', function(req, res, next) {
         }
         else{
           //no hash update users 
+
+          //stringify update params 
           var jsonQuery = JSON.stringify(query);
           jsonQuery = JSON.parse(jsonQuery);
+
+          //update user
           User.update({email:t_email},{$set:jsonQuery},function(err,result){
+              //if error return 
                if(err){
                     res.status(401).json({success : false, message : "couldn't update. But user not trying to update pwd"});
                   }
+
+
                if(query["email"]){
                   //update devices and activities
+
+                     //stringify query
                      query2 = JSON.stringify({userEmail:query["email"]});
                       query2 = JSON.parse(query2);
                       console.log(query2);
+
+                      //update acts
                       Activity.updateMany({userEmail:t_email},{$set:query2},function(err1,res1){
+                        // if error return 
                           if(err){
                               res.status(400).json({success : false, message : "porblem with updating activites"});  
                           }
                           else{
-
+                             //update devices
                              Device.updateMany({userEmail:t_email},{$set:query2},function(err2,res2){
+                              //if err return 
                           if(err){
                               res.status(400).json({success : false, message : "porblem with updating devices"});  
                           }
+
                           else{
+                            //return new authToken
                             var newToken = jwt.encode({email: query["email"]}, secret);
-                            query["success"]=true;
-				query["message"]="updated email throughout entire db";
-				query["userRes"]=result;
-				query["activityRes"]=res1;
-				query["devRes"]=res2;
-				query["newToken"]=newToken;				
-			    res.status(201).json(query);//{success : true, message:"updated email throughout entire db", userRes : result, activityRes: res1, devRes: res2, newToken: newToken});
+                            res.status(201).json({success : true, message:"updated email throughout entire db", userRes : result, activityRes: res1, devRes: res2, newToken: newToken});
                           }
                               
                           }
@@ -241,9 +284,7 @@ router.post('/update', function(req, res, next) {
                 }
               else{
                 //just return result
-      		query["success"]=true;
-		query["userRes"]=result;
-	          res.status(201).json(query);//{email:em,fullName:na,success : true, userRes : result});
+                res.status(201).json({success : true, userRes : result});
               }
 
 
@@ -262,10 +303,9 @@ router.post('/update', function(req, res, next) {
 
   }
   catch(ex){
-    return res.status(401).json({succes: false, message: "Invalid authentication token"}); 
+    return res.status(401).json({success: false, message: "Invalid authentication token"}); 
   }
 });
-
 
 
 
