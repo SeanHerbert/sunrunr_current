@@ -15,7 +15,7 @@ function sendReqForAccountInfo() {
 function accountInfoSuccess(data, textSatus, jqXHR) {
   $("#email").html(data.email);
   $("#fullName").html(data.fullName);
-  $("#lastAccess").html(data.lastAccess);
+  $("#lastAccess").html(iso2std(data.lastAccess));
   $("#main").show();
   if(data.thresh){
     console.log("thresh value is present");
@@ -497,7 +497,7 @@ if(newEmail.replace(/\s/g, '').length){
      $('#fullName').html(newName); 
   }
 
-let umsg = "<p>Acount information updated successfully!</p>"
+let umsg = "<p class='green-text'><b>Acount information updated successfully!</b></p>"
 $('#umsg').html(umsg);
 $("#um").slideDown();
 setTimeout(function(){$("#um").slideUp();},3000);
@@ -518,8 +518,10 @@ $('#big-papa').html(deets);
 
 
 
-
-
+function iso2std(s) {
+    var b = s.split(/\D+/);
+    return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5], b[6]));
+}
 
 
 

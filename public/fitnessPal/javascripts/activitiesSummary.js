@@ -90,32 +90,32 @@ function displayActivities(data, textSatus, jqXHR) {
     speeds = [];
      uvs = [];
      avgSpeed = 0;
-     avgUV = 0;
+     totUV = 0;
      len = activity.samples.length;
      mins = len/4;
      type = activity.type;
     for (let s of activity.samples){
         
         avgSpeed +=s.speed;
-        avgUV += s.uv;
+        totUV += s.uv;
 
     }
     avgSpeed = avgSpeed / (len);
-    avgUV = avgUV / (len);
-    avgUV = avgUV.toFixed(2);
+    totUV = totUV.toFixed(2);
     calsBurned = getCals();
+    start = parseISOString(activity.start);
    
 
     link = "activitiesDetail.html?number="+activity.id;
                 listItems+=
                 `<li class="collection-item teal lighten-5">
                 <div><b> Activity:</b> ${type}<a href=${link} class="secondary-content"><i class="material-icons">info_outline</i></a></div>
-                <li class="collection-item grey lighten-4"><div><b>Date:</b> ${activity.start}</div></li>
+                <li class="collection-item grey lighten-4"><div><b>Date:</b> ${start}</div></li>
                 <li class="collection-item grey lighten-4"><div><b>Duration:</b> ${activity.duration}</div></li>
                 <li class="collection-item grey lighten-4"><div><b>Calories Burned:</b> ${calsBurned}</div></li>
-                <li class="collection-item grey lighten-4"><div><b>UV Exposure:</b> ${avgUV}</div></li>
-                <li class="collection-item grey lighten-4"><div><b>Temperature:</b> ${activity.weather.temperature}</div></li>
-                <li class="collection-item grey lighten-4"><div><b>Humidity:</b> ${activity.weather.humidity}</div></li>
+                <li class="collection-item grey lighten-4"><div><b>UV Exposure:</b> ${totUV} watts/cm<sup>2</sup></div></li>
+                <li class="collection-item grey lighten-4"><div><b>Temperature:</b> ${activity.weather.temperature}&deg;F</div></li>
+                <li class="collection-item grey lighten-4"><div><b>Humidity:</b> ${activity.weather.humidity}%</div></li>
 
 
 
@@ -125,8 +125,25 @@ function displayActivities(data, textSatus, jqXHR) {
   }
   
   $('#activityList').html(listItems);
+  putMsg(data);
   
           
+}
+
+
+function putMsg(data){
+  var msg = `<li class="collection-item teal lighten-5"><div><b>Since you became a FitnessPal, you have logged:</b></div></li>`;
+  if( data.activities.length==0){
+
+     msg +=`<li class="collection-item grey lighten-4"><div>0 Activities, get moving. You can do it!</div></li>`;
+              
+
+  }
+  else{
+      msg +=`<li class="collection-item grey lighten-4"><div>${data.activities.length} activities, keep up the good work!</div></li>`;
+              
+  }
+   $('#good-job').html(msg);
 }
 
 function displayActivitiesError(jqXHR, textStatus, errorThrown) {
@@ -140,6 +157,12 @@ function displayActivitiesError(jqXHR, textStatus, errorThrown) {
     $("#activityList").html("Error: " + status.message);
     
   } 
+}
+
+
+function parseISOString(s) {
+    var b = s.split(/\D+/);
+    return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5], b[6]));
 }
 
 

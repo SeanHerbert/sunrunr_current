@@ -125,7 +125,7 @@ console.log(req.body.deviceId);
 	 for(let i = 4;i<data.length;i+=5){
 			 lat = data[i-3];
 			 lon = data[i-2];
-			 speed = data[i-1];
+			 speed = data[i-1]*1.150779; //convert knots to mph
 			 uv = data[i];
 			 sample = new ActivitySample({
 						 longitude: lon,
@@ -169,12 +169,12 @@ console.log(req.body.deviceId);
 			 type = "biking";
 		 }
 
-		 var avgUV = 0;
+		 var totUV = 0;
 
 		 for(let i=0;i<samples.length;i++){
-		 	avgUV +=samples[i].uv;
+		 	totUV +=samples[i].uv;
 		 }
-		 avgUV = avgUV/samples.length;
+		
 
 
 
@@ -226,7 +226,7 @@ console.log(req.body.deviceId);
 								 deviceId:     req.body.deviceId,
 								 apikey:       req.body.apikey,
 								 userEmail:     userEmail,  
-								 uv:            avgUV,
+								 uv:            totUV,
 								 weather:      {temperature: temp, humidity: hum}  
 								
 							 });
@@ -329,7 +329,7 @@ router.get("/summary/:days", function(req, res) {
 
 	"userEmail": decodedToken.email
 	
-    }).sort({ "date": -1 });
+    }).sort({ "_id": -1 });
     
     
     activitiesQuery.exec({}, function(err, activities) {

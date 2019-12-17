@@ -63,15 +63,16 @@ function buildDetails(data){
     var activity= data.activity;
     //console.log(activty);
     uvv= Number.parseFloat(activity.uv);
+    act_start = iso2std(activity.start);
     uvv = uvv.toFixed(2);
     var detailsHTML = `<li class="collection-header grey lighten-4" ><h4>Activity Details</h4></li>
                 <li class="collection-item teal lighten-5">
                 <div><b> Activity:</b><span id = 'actyp'> ${activity.type}</span></div>
-                <li class="collection-item grey lighten-4"><div><b>Date:</b> ${activity.start}</div></li>
+                <li class="collection-item grey lighten-4"><div><b>Date:</b> ${act_start}</div></li>
                 <li class="collection-item grey lighten-4"><div><b>Duration:</b> ${activity.duration}</div></li>
-                <li class="collection-item grey lighten-4"><div><b>UV Exposure:</b> ${uvv}</div></li>
-                <li class="collection-item grey lighten-4"><div><b>Temperature:</b> ${activity.weather.temperature}</div></li>
-                <li class="collection-item grey lighten-4"><div><b>Humidity:</b> ${activity.weather.humidity}</div></li> 
+                <li class="collection-item grey lighten-4"><div><b>UV Exposure:</b> ${uvv} watts/cm<sup>2</sup></div></li>
+                <li class="collection-item grey lighten-4"><div><b>Temperature:</b> ${activity.weather.temperature}&deg;F</div></li>
+                <li class="collection-item grey lighten-4"><div><b>Humidity:</b> ${activity.weather.humidity}%</div></li> 
                 </li>`;;
   $('#activityList').html(detailsHTML);
 }
@@ -188,9 +189,10 @@ function makeSpeedChart(dataPoints0){
   axisX:{
     title: "minutes",
     includeZero: false,
-    interval: 4
+    interval: 4,
     labelFormatter: function(e){
-        return  "X: " + 0;
+
+        return  e.value/4;
       }
   },
   data: [{        
@@ -213,7 +215,17 @@ function makeUVChart(dataPoints){
     text: `UV Exposure`
   },
   axisY:{
+    title: "watts/cm^2",
     includeZero: false
+  },
+  axisX:{
+    title: "minutes",
+    includeZero: false,
+    interval: 4,
+    labelFormatter: function(e){
+
+        return  e.value/4;
+      }
   },
   data: [{        
     type: "line",       
@@ -250,7 +262,10 @@ function updateError(jqXHR, textStatus, errorThrown){
       console.log(errorThrown);
 
 }
-
+function iso2std(s) {
+    var b = s.split(/\D+/);
+    return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5], b[6]));
+}
 
 // Handle authentication on page load
 $(function() {
