@@ -1,3 +1,4 @@
+
 function sendSigninRequest() {
   let email = $('#email').val();
   let password = $('#password').val();
@@ -16,6 +17,7 @@ function sendSigninRequest() {
 function signinSuccess(data, textSatus, jqXHR) {
   // TODO
   window.localStorage.setItem('authToken', data.authToken);
+  
   window.location = "account.html";
 }
 

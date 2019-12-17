@@ -1,20 +1,14 @@
+
 function sendRegisterRequest() {
   let email = $('#email').val();
   let password = $('#password').val();
   let fullName = $('#fullName').val();
   let passwordConfirm = $('#passwordConfirm').val();
   
-  // Check to make sure the passwords match
-  // FIXME: Check to ensure strong password 
-  // if (password != passwordConfirm) {
-  //   $('#ServerResponse').html("<span class='red-text text-darken-2'>Passwords do not match.</span>");
-  //   $('#ServerResponse').show();
-  //   return;
-  // }
-
-  //if(regNotValid()){
-  //  return;
- // }
+  
+  if(regNotValid()){
+    return;
+  }
   
   $.ajax({
    url: '/node/users/register',

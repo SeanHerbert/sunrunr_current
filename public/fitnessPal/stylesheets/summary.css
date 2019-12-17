@@ -1,0 +1,70 @@
+
+#logo {
+    margin: 5px;
+    width: 50px;
+}
+
+#name {
+    font-size: 32pt;
+    vertical-align: top;
+}
+
+#account {
+   padding-top: 5px;
+}
+
+#addDeviceForm, #main, #error {
+   display: none;
+}
+#main{
+    display: block;
+    color: black;
+}
+/*changes start here*/
+
+.error{
+    display: none;
+}
+
+
+.element{
+    display:inline-block;
+}
+.opaq{
+ opacity: 0.7;
+}
+
+body{
+background-image: url("../images/road.jpg");
+background-repeat: no-repeat;
+background-attachment: fixed;
+background-size: cover;
+}
+
+.score {
+    clear: both;
+    margin: 2px;
+    width: 60%;
+    height: 60px;
+    background-color: #eceff1;
+    border: 3px inset #607d8b;
+    border-radius: 5px;
+     
+    //color: teal;
+    font-size: 2.2em;
+    /*Center the text*/
+    text-align: center;
+    vertical-align: middle;
+    line-height: 60px; /*Same as the div height*/
+    top: 30px;
+    left: 735px;
+    z-index: 99; /*Place elements with this class in front of other elements*/
+}
+
+.image {
+    padding-left: 90px;
+    display:block;
+    height: 180px;
+    width: 70%;
+}
+

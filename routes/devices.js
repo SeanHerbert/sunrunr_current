@@ -1,6 +1,7 @@
 let express = require('express');
 let router = express.Router();
 let Device = require("../models/device");
+let User = require("../models/users");
 let fs = require('fs');
 let jwt = require("jwt-simple");
 
@@ -18,6 +19,48 @@ function getNewApikey() {
 
   return newApikey;
 }
+
+
+//endpoint for particle to get uv thresh 
+
+router.post('/thresh', function(req, res, next) {
+    console.log("device id seen by server: "+req.body.deviceId);
+    console.log("apikey seen by server: "+req.body.apikey);
+    Device.findOne({deviceId: req.body.deviceId, apikey: req.body.apikey}, function(err, device){
+        console.log("Looking for device " + req.body.deviceId);
+        if(err || !device){
+            res.status(401).send({success: false, error: err});
+            console.log(err);
+        }
+        else{
+            console.log("Looking for email" + device.userEmail);
+            User.findOne({email: device.userEmail}, function(err, user){
+                if(err || !user){
+                    res.status(400).send({success: false, error: err});
+                    console.log(err);
+                }
+                else{
+                    console.log({
+                        success: true,
+                        threshold: user.threshold
+                    });
+                    res.status(200).json(//{
+                        //success: true,
+                        //threshold: 
+			user.threshold
+                    //}
+);
+                }
+                
+            });
+        }
+        
+        
+    }); 
+});
+
+
+
 
 // GET request return one or "all" devices registered and last time of contact.
 router.get('/status/:devid', function(req, res, next) {

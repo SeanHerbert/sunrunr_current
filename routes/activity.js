@@ -45,6 +45,8 @@ router.post("/record", function(req, res) {
          message : ""
         
      };
+console.log(req.body.apikey);
+console.log(req.body.deviceId);
       
 	
 	
@@ -66,10 +68,10 @@ router.post("/record", function(req, res) {
 
 
 
-	
+	 
 	
 	 Device.findOne({
-        	//apikey: req.body.apikey,
+                 apikey: req.body.apikey,
 		 deviceId: req.body.deviceId
 		 		 }, function(err,device){
 							 if (err) {
@@ -80,8 +82,8 @@ router.post("/record", function(req, res) {
 						 if(!device){
 							 responseJson.success = false;
 							 responseJson.message = "Device not registered or incorrect apikey or not associated with this account";
-
-							 return res.status(422).send(JSON.stringify(responseJson.message));
+							 console.log("device not found");
+							 return res.status(400).send(JSON.stringify(responseJson.message));
 
 							 }
 							
@@ -246,7 +248,7 @@ console.log("weather data should follow:"+ activity.weather.temperature + " "+ac
 				 }
 			
 				 responseJson.success = true;
-				 return res.status(201).send(JSON.stringify(responseJson));
+				 return res.status(201).send(JSON.stringify(201));
 				
 				 });
 		
@@ -269,6 +271,28 @@ console.log("weather data should follow:"+ activity.weather.temperature + " "+ac
 
 });
 
+
+router.post("/update",function(req,res){
+	 let responseJson = {
+        success: false,
+        id: req.body.ref,
+        message : ""
+    };
+    Activity.updateOne({_id:req.body.ref},{type:req.body.type},function(err,result){
+    	if(err){
+    		responseJson.message = "not updated";
+    		return res.status(400).json(responseJson);
+    	}
+    	responseJson.message = JSON.stringify(result);
+    	responseJson.success = true;
+    	return res.status(201).json(responseJson);
+    });
+	
+
+});
+
+
+
 // GET: Returns all Activites first reported in the previous specified number of days
 // Authentication: Token. A user must be signed in to access this endpoint
 router.get("/summary/:days", function(req, res) { 
@@ -276,7 +300,7 @@ router.get("/summary/:days", function(req, res) {
         let responseJson = {
         success: true,
         message: "",
-        activities: [],
+        activities: []
     };
     
     if (authenticateRecentEndpoint) {
@@ -296,7 +320,7 @@ router.get("/summary/:days", function(req, res) {
         return res.status(200).json(responseJson);
     }
     
-    // Find all potholes reported in the spcified number of days
+    // Find all activites reported in the spcified number of days
     let activitiesQuery = Activity.find({
     //    "date": 
      //   {
@@ -319,9 +343,9 @@ router.get("/summary/:days", function(req, res) {
             let numActivities = 0;
 			
             for (let a of activities) {
-                // Add pothole data to the respone's potholes array
+                // Add activity data to the respone's array
                 numActivities++; 
-		
+				//console.log(a._id);
                 responseJson.activities.push({
                     type: a.type,
 					date: a.date,
@@ -329,7 +353,8 @@ router.get("/summary/:days", function(req, res) {
 					duration: a.duration,
 					uv: a.uv,
 					weather: a.weather,
-					id: a.id
+					id: a._id,
+					samples: a.samples
                     
                 });
             }
@@ -353,10 +378,10 @@ router.get("/detail/:number", function(req, res) {
             return res.status(401).json(responseJson);
         }
     }
-    // Find all potholes reported in the spcified number of days
-    let activitiesQuery = Activity.findOne({
-      "id":Number(req.params.number),
-      "userEmail": decodedToken.email
+    	console.log("_id: "+req.params.number);
+
+        let activitiesQuery = Activity.findOne({
+      "_id":req.params.number
     });
         //console.log(typeof(Number(req.params.number)));
         //console.log(activitiesQuery);

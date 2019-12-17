@@ -1,3 +1,5 @@
+
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -10,6 +12,8 @@ var usersRouter = require('./routes/users');
 var devicesRouter = require('./routes/devices');
 
 var activityRouter = require('./routes/activity');
+
+var weatherRouter = require('./routes/weather');
 
 var app = express();
 
@@ -46,6 +50,8 @@ app.use('/users', usersRouter);
 app.use('/devices', devicesRouter);
 
 app.use('/activity',activityRouter);
+
+app.use('/weather',weatherRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

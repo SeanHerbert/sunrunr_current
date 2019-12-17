@@ -1,3 +1,4 @@
+
 function getActivity() {
   let link = window.location.href;
   let refNum = link.split("=")[1];
@@ -15,21 +16,26 @@ function getActivity() {
 function activityHandler(data, textStatus, jqXHR){
     
      speeds = [];
+     uvs = [];
      avgSpeed = 0;
      len = data.samples.length;
      mins = len/4;
      type = data.type;
     for (let s of data.samples){
         speeds.push({y : s.speed});
+        uvs.push({y : s.uv});
         avgSpeed +=s.speed;
+  
 
     }
+        
     avgSpeed = avgSpeed / (len);
     
     setChecked(type);
     putCals();
     buildDetails(data);
     makeSpeedChart(speeds);
+    makeUVChart(uvs);
     
     
 
@@ -56,15 +62,16 @@ function buildDetails(data){
 
     var activity= data.activity;
     //console.log(activty);
+    uvv= Number.parseFloat(activity.uv);
+    uvv = uvv.toFixed(2);
     var detailsHTML = `<li class="collection-header grey lighten-4" ><h4>Activity Details</h4></li>
                 <li class="collection-item teal lighten-5">
                 <div><b> Activity:</b><span id = 'actyp'> ${activity.type}</span></div>
                 <li class="collection-item grey lighten-4"><div><b>Date:</b> ${activity.start}</div></li>
                 <li class="collection-item grey lighten-4"><div><b>Duration:</b> ${activity.duration}</div></li>
-                <li class="collection-item grey lighten-4"><div><b>Calories Burned:</b> Decide calculation</div></li>
-                <li class="collection-item grey lighten-4"><div><b>UV Exposure:</b> ${activity.uv}</div></li>
+                <li class="collection-item grey lighten-4"><div><b>UV Exposure:</b> ${uvv}</div></li>
                 <li class="collection-item grey lighten-4"><div><b>Temperature:</b> ${activity.weather.temperature}</div></li>
-                <li class="collection-item grey lighten-4"><div><b>Humidity:</b> ${activity.weather.humidity}</div></li>
+                <li class="collection-item grey lighten-4"><div><b>Humidity:</b> ${activity.weather.humidity}</div></li> 
                 </li>`;;
   $('#activityList').html(detailsHTML);
 }
@@ -164,15 +171,46 @@ function errorHandler(jqXHR, textStatus, errorThrown) {
 
 
 
-function makeSpeedChart(dataPoints){
+function makeSpeedChart(dataPoints0){
 
 
 
-     var chart = new CanvasJS.Chart("chartContainer", {
+     var chart1 = new CanvasJS.Chart("chartContainer1", {
   animationEnabled: true,
   theme: "light2",
   title:{
     text: `Speed`
+  },
+  axisY:{
+    title: "mph",
+    includeZero: false
+  },
+  axisX:{
+    title: "minutes",
+    includeZero: false,
+    interval: 4
+    labelFormatter: function(e){
+        return  "X: " + 0;
+      }
+  },
+  data: [{        
+    type: "line",       
+    dataPoints: dataPoints0
+  }]
+});
+chart1.render();
+}
+
+
+function makeUVChart(dataPoints){
+
+
+
+     var chart2 = new CanvasJS.Chart("chartContainer2", {
+  animationEnabled: true,
+  theme: "light2",
+  title:{
+    text: `UV Exposure`
   },
   axisY:{
     includeZero: false
@@ -182,11 +220,36 @@ function makeSpeedChart(dataPoints){
     dataPoints: dataPoints
   }]
 });
-chart.render();
+chart2.render();
 }
 
 
+function sendTypeUpdate(){
+    let link = window.location.href;
+    let refNum = link.split("=")[1];
+    sendData = {type: type, ref: refNum};
+    $.ajax({
+    url: '/node/activity/update',
+    type: 'POST',
+    headers: { 'x-auth': window.localStorage.getItem("authToken") },  
+    contentType: 'application/json',
+    data: JSON.stringify(sendData), 
+    dataType: 'json'
+   })
+    .done(updateSuccess)
+    .fail(updateError); 
+}
 
+function updateSuccess(data, textSatus, jqXHR){
+    console.log(`activity ${data.id} ${data.message}`);
+
+}
+function updateError(jqXHR, textStatus, errorThrown){
+    console.log(jqXHR);
+     console.log(textStatus);
+      console.log(errorThrown);
+
+}
 
 
 // Handle authentication on page load
@@ -197,8 +260,13 @@ $(function() {
    }
    getActivity();
    $('input[type=radio]').click(function(){
-    type = this.value;
-    putCals();
+    if(type != this.value){
+      console.log("type changed");
+      type = this.value;
+      putCals();
+      sendTypeUpdate();
+    }
+    
     
     });
    // $('#r').click(putCals('running'));

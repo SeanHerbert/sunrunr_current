@@ -12,7 +12,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="/node/fitnessPal/javascripts/canvasjs.min.js"></script>
+    <script src="/node/fitnessPal/javascripts/signout.js"></script>
 
 
     <link href="/node/fitnessPal/stylesheets/fitnessPal.css" rel="stylesheet">
@@ -27,14 +28,20 @@
 
   <body>
     <!-- Dropdown Structure -->
-    <ul id='dropdown1' class='dropdown-content'>
-      <li><a href="account.html">Home</a></li>
-      <li><a href = "activtiesSummary.html">activities Summary</a></li>
-      <li><a href="forecast.html">Weather Forecast</a></li>
-      <li class="divider"></li>
-      <li><a href="#!" id="signout">Sign out</a></li>
+   <ul id='dropdown1' class='dropdown-content'>
+		<li><a href="account.html">Home</a></li>
+<li class="divider"></li>
 
-    </ul>
+		<li><a href="summary.html">Summary</a></li>
+<li class="divider"></li>
+
+        <li><a href="activtiesSummary.html">Activities</a></li>
+<li class="divider"></li>
+
+        <li><a href="forecast.html">Weather</a></li>
+		<li class="divider"></li>
+		<li><a href="#!" id="signout">Sign out</a></li>
+	</ul>
 
     <nav>
       <div class="nav-wrapper blue-grey darken-2">
@@ -50,17 +57,15 @@
       <div class="col s12 m6">
         <div class="card blue-grey ">
   <div class="card-content teal-text">
-        <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+        <div id="chartContainer1"></div>
   </div>
   </div>
-     <div class="card blue-grey "> 
-          <div class="card-content teal-text">
-           <ul class="collection with-header teal lighten-2" id = "activityList" >
-           </ul>
-            
-          </div>
-          <!-- <div class="card-panel blue-text" id="ServerResponse" style="display: none"></div> -->
-        </div>
+  <div class="card blue-grey ">
+  <div class="card-content teal-text">
+        <div id="chartContainer2"></div>
+  </div>
+  </div>
+     
       </div>
       <div class="col s12 m6 l5">
         <div class="card blue-grey ">
@@ -93,6 +98,14 @@
       
     
   </form>
+  <div class="card blue-grey "> 
+          <div class="card-content teal-text">
+           <ul class="collection with-header teal lighten-2" id = "activityList" >
+           </ul>
+            
+          </div>
+          <!-- <div class="card-panel blue-text" id="ServerResponse"></div> -->
+        </div>
       </div>
     </div>
   </body>

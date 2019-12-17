@@ -2,10 +2,13 @@ let express = require('express');
 let router = express.Router();
 let User = require("../models/users");
 let Device = require("../models/device");
+let Activity = require("../models/activity")
 let fs = require('fs');
 let bcrypt = require("bcryptjs");
 let jwt = require("jwt-simple");
 let request = require('request');
+let requestIp = require('request-ip');
+
 
 
 var jsdom = require("jsdom");
@@ -22,6 +25,8 @@ var $ = jQuery = require('jquery')(window);
 var secret = fs.readFileSync(__dirname + '/../../jwtkey').toString();
 
 router.post('/signin', function(req, res, next) {
+   
+  //console.log(clientIp);
   User.findOne({email: req.body.email}, function(err, user) {
     if (err) {
        res.status(401).json({success : false, message : "Can't connect to DB."});         
@@ -36,7 +41,43 @@ router.post('/signin', function(req, res, next) {
          }
          else if(valid) {
             var authToken = jwt.encode({email: req.body.email}, secret);
-            res.status(201).json({success:true, authToken: authToken});
+            var clientIp = requestIp.getClientIp(req);
+
+            
+
+
+
+            $.ajax({
+                url: `http://ip-api.com/json/${clientIp}?fields=16576`,
+                type: 'GET',
+                //crossDomain:true,
+                responseType: 'json',
+                contentType: 'application/json',
+                dataType: 'json'
+              })
+                .done(function(data,textStatus,jqXHR){
+                  if(data.status=="success"){
+                      console.log("lat followed by lon from ip-api");
+                      console.log(data.lat);
+                      console.log(data.lon);
+                      res.status(201).json({success:true, authToken: authToken, lat: data.lat, lon:data.lon }); 
+                  }
+                  else{
+                    res.status(201).json({s:true, authToken: authToken, userIpAddr: clientIp });
+                  }
+                })
+                .fail(function(jqXHR, textStatus, errorThrown){
+                      res.status(201).json({su:true, authToken: authToken, userIpAddr: clientIp });
+
+                });
+
+
+
+
+
+            
+      //console.log(clientIp);
+            
          }
          else {
             res.status(401).json({success : false, message : "Email or password invalid."});         
@@ -46,6 +87,187 @@ router.post('/signin', function(req, res, next) {
     }
   });
 });
+
+
+
+router.post('/update', function(req, res, next) {
+  if (!req.headers["x-auth"]) {
+          
+          return res.status(401).json({success: false, message: "No authentication token"});
+       }
+  if(!req.body.hasOwnProperty('e')){
+      return res.status(400).json({success: false, message: "missing email"});  
+  }
+  if(!req.body.hasOwnProperty('n')){
+      return res.status(400).json({success: false, message: "missing name"});  
+  }
+  if(!req.body.hasOwnProperty('p')){
+      return res.status(400).json({success: false, message: "missing password"});  
+  }
+  var em =req.body.e;
+  var na = req.body.n;
+  var pw = req.body.p;
+
+  try{
+    var authToken = req.headers["x-auth"]; 
+    var decodedToken = jwt.decode(authToken, secret);
+    var t_email = decodedToken.email;
+    User.findOne({email: t_email}, function(err, user) {
+    if (err) {
+       res.status(401).json({success : false, message : "Can't connect to DB."});         
+    }
+    else if(!user) {
+       res.status(401).json({success : false, message : "user no existe!."});         
+    }
+    else {
+      //update user infor
+      query = {};
+      if(em.replace(/\s/g, '').length){
+        query["email"] = em;
+        
+        }
+      if(na.replace(/\s/g, '').length){
+        query["fullName"] = na;
+        }
+      if(pw.replace(/\s/g, '').length){
+        //hash it, store it 
+        bcrypt.hash(pw, 10, function(err, hash) {
+            if (err) {
+               res.status(401).json({success : false, message : "not authorized"});         
+            }
+            else {
+
+              query["passwordHash"] = hash;
+              var jsonQuery = JSON.stringify(query);
+              jsonQuery = JSON.parse(jsonQuery);
+              
+              User.update({email:t_email},{$set:jsonQuery},function(err,result){
+                  if(err){
+                    res.status(401).json({success : false, message : "couldn't update user. but inside bcrpyt hash"});
+                  }
+                  else{
+                    if(query["email"]){
+                      query2 = JSON.stringify({userEmail:query["email"]});
+                      query2 = JSON.parse(query2);
+                      console.log(query2);
+                      Activity.updateMany({userEmail:t_email},{$set:query2},function(err1,res1){
+                          if(err){
+                              res.status(400).json({success : false, message : "porblem with updating activites"});  
+                          }
+                          else{
+			     var newToken= jwt.encode({email:query["email"]},secret);
+                             Device.updateMany({userEmail:t_email},{$set:query2},function(err2,res2){
+                          if(err){
+                              res.status(400).json({success : false, message : "porblem with updating devices"});  
+                          }
+                          else if(query["fullName"]){
+			    res.status(201).json({email:em,fullName:na,success:true,message:"updated email throughout entire db",userRes:result,activityRes:res1,devRes:res2,newToken:newToken});
+			  }
+			  else{
+                            var newToken = jwt.encode({email: query["email"]}, secret);
+                            res.status(201).json({email:em,success : true, message:"updated email throughout entire db", userRes : result, activityRes: res1, devRes: res2, newToken: newToken});
+                          }
+                              
+                          }
+
+                      ); 
+                          }
+                              
+                          }
+
+                      ); 
+
+                      
+                    }
+                    else{
+			query["success"] = true;
+			query["message"]=result;
+			res.status(201).json(query);}
+                    
+                  }
+
+              });
+              
+              
+           
+            }
+        });   
+        
+        }
+        else{
+          //no hash update users 
+          var jsonQuery = JSON.stringify(query);
+          jsonQuery = JSON.parse(jsonQuery);
+          User.update({email:t_email},{$set:jsonQuery},function(err,result){
+               if(err){
+                    res.status(401).json({success : false, message : "couldn't update. But user not trying to update pwd"});
+                  }
+               if(query["email"]){
+                  //update devices and activities
+                     query2 = JSON.stringify({userEmail:query["email"]});
+                      query2 = JSON.parse(query2);
+                      console.log(query2);
+                      Activity.updateMany({userEmail:t_email},{$set:query2},function(err1,res1){
+                          if(err){
+                              res.status(400).json({success : false, message : "porblem with updating activites"});  
+                          }
+                          else{
+
+                             Device.updateMany({userEmail:t_email},{$set:query2},function(err2,res2){
+                          if(err){
+                              res.status(400).json({success : false, message : "porblem with updating devices"});  
+                          }
+                          else{
+                            var newToken = jwt.encode({email: query["email"]}, secret);
+                            query["success"]=true;
+				query["message"]="updated email throughout entire db";
+				query["userRes"]=result;
+				query["activityRes"]=res1;
+				query["devRes"]=res2;
+				query["newToken"]=newToken;				
+			    res.status(201).json(query);//{success : true, message:"updated email throughout entire db", userRes : result, activityRes: res1, devRes: res2, newToken: newToken});
+                          }
+                              
+                          }
+
+                      ); 
+                          }
+                              
+                          }
+
+                      ); 
+
+
+                }
+              else{
+                //just return result
+      		query["success"]=true;
+		query["userRes"]=result;
+	          res.status(201).json(query);//{email:em,fullName:na,success : true, userRes : result});
+              }
+
+
+
+          });
+          
+         
+
+        }
+     
+    }
+  });
+
+    
+
+
+  }
+  catch(ex){
+    return res.status(401).json({succes: false, message: "Invalid authentication token"}); 
+  }
+});
+
+
+
 
 
 router.post('/token', function (req,res,next){
@@ -93,7 +315,7 @@ router.get('/logins', function (req,res,next){
             url: 'https://seanh-webauthn.duckdns.org/reg_sign_in_controller.php', 
             form: {"email":email,"logs":true}
           }, function(err,response,logins){
-	    // console.log("first thing in logins request callback")
+      // console.log("first thing in logins request callback")
             // console.log("login data: "+logins[0]);
              logins = JSON.parse(logins);
              return res.status(200).json(logins); 
@@ -104,32 +326,74 @@ router.get('/logins', function (req,res,next){
        // }
 });
 
+
+
+
+
+
+
+
+router.put("/threshold", function(req, res){
+     if (!req.headers["x-auth"]) {
+        return res.status(401).json({success: false, message: "No authentication token"});
+    }
+
+    var authToken = req.headers["x-auth"];
+    try {
+        var token_dec = jwt.decode(authToken, secret);
+        let query={
+            "email" : token_dec.email
+        }
+        User.update(query, { $set: { threshold: req.body.threshold }}, function (err, data){
+            if(err){
+                return res.status(400).json({success: false, message: "Error updating thresh"});
+            }
+            else{
+                return res.status(200).json({success : true, changeData: data}); 
+            }
+        });
+    } catch (e) {
+        res.status(400).send(e);
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 router.get("/account" , function(req, res) {
    // Check for authentication token in x-auth header
-      if (!req.headers["x-auth"]) {
-      
+   if (!req.headers["x-auth"]) {
       return res.status(401).json({success: false, message: "No authentication token"});
    }
-
-   try{
-    var authToken = req.headers["x-auth"]; 
-    var decodedToken = jwt.decode(authToken, secret);
-    var email = decodedToken.email;
-    userStatus ={};
-    data = {"email":email,"acct":true};
-    request.post({
-    headers: {'content-type' : 'application/json'},
-    url: 'https://seanh-webauthn.duckdns.org/reg_sign_in_controller.php', 
-    form: {"email":email,"acct":true},
-    //json:true
-  }, function(err,result,user){
-     user = JSON.parse(user);
-     userStatus['success'] = true;
-     userStatus['email'] = user.email;
-     userStatus['fullname'] = user.fullName;
-     userStatus['lastaccess'] = user.lastAccess;
-     
-     Device.find({ userEmail : decodedToken.email}, function(err, devices) {
+   
+   var authToken = req.headers["x-auth"];
+   
+   try {
+      var decodedToken = jwt.decode(authToken, secret);
+      var userStatus = {};
+      
+      User.findOne({email: decodedToken.email}, function(err, user) {
+         if(err) {
+            return res.status(400).json({success: false, message: "User does not exist."});
+         }
+         else {
+            userStatus['success'] = true;
+            userStatus['email'] = user.email;
+            userStatus['fullName'] = user.fullName;
+            userStatus['lastAccess'] = user.lastAccess;
+	    userStatus['thresh'] = user.threshold;
+            
+            // Find devices based on decoded token
+          Device.find({ userEmail : decodedToken.email}, function(err, devices) {
             if (!err) {
                // Construct device list
                let deviceList = []; 
@@ -144,26 +408,12 @@ router.get("/account" , function(req, res) {
             
                return res.status(200).json(userStatus);            
           });
-
-  
-    }); 
-
-  }
-
- catch (ex) {
+         }
+      });
+   }
+   catch (ex) {
       return res.status(401).json({success: false, message: "Invalid authentication token."});
    }
-    
-
-   
-    
-
-
-   
-  
-      
-   
 });
-
 
 module.exports = router;
