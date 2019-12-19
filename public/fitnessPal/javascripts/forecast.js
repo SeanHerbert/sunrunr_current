@@ -96,11 +96,11 @@ var uvs = [];
     $('#hl4').html(`<b>High:</b> ${his[3]}&deg; <b>Low:</b> ${los[3]}&deg;`);
     $('#hl5').html(`<b>High:</b> ${his[4]}&deg; <b>Low:</b> ${los[4]}&deg;`);
 
-    $('#desc1').html(`<b>Desription:</b> ${descs[0]}`);
-    $('#desc2').html(`<b>Desription:</b> ${descs[1]}`);
-    $('#desc3').html(`<b>Desription:</b> ${descs[2]}`);
-    $('#desc4').html(`<b>Desription:</b> ${descs[3]}`);
-    $('#desc5').html(`<b>Desription:</b> ${descs[4]}`);
+    $('#desc1').html(`<b>Description:</b> ${descs[0]}`);
+    $('#desc2').html(`<b>Description:</b> ${descs[1]}`);
+    $('#desc3').html(`<b>Description:</b> ${descs[2]}`);
+    $('#desc4').html(`<b>Description:</b> ${descs[3]}`);
+    $('#desc5').html(`<b>Description:</b> ${descs[4]}`);
 
 
 

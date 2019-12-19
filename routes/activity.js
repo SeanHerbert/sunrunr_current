@@ -16,10 +16,12 @@ var samples = [];
 var walkingMax = 4.0;
 var runningMax = 10.0;
 var endFlag = false;
-var type = "default";
+var type = "walking";
 var endTime = 0;
 var realStart = 0;
 global.userEmail = "";
+var duration = 0;
+var repeat =false;
 
 function authenticateAuthToken(req) {
     // Check for authentication token in x-auth header
@@ -38,20 +40,52 @@ function authenticateAuthToken(req) {
     }
 }
 
+
+ function getDur(dur){
+             if(duration <60000){
+                duration = duration/1000;
+                duration = duration + " seconds";
+             }
+             else if(duration>60000 && duration <3600000){
+                duration = duration/1000;
+                var secs =  duration % 60;
+                duration = duration -secs;
+                duration = duration / 60;
+                duration = duration + " minutes " + secs+ " seconds";
+             }
+             else{
+                duration = duration/1000;
+                var secs =  duration % 60;
+                duration = duration -secs;
+                duration = duration/60; //min
+                var mins = duration % 60;
+                duration = duration - mins;
+                durartion = duration /60;
+                duration  = duration +" hours " +mins+" minutes "+secs+" secs";
+
+
+             }
+              return duration;
+                 }
+
 router.post("/record", function(req, res) {
-		
+         
+         repeat = true;
          let responseJson = {
          success : false,
          message : ""
         
      };
-console.log(req.body.apikey);
-console.log(req.body.deviceId);
+console.log("in endpoint");
+//console.log(JSON.parse(req.body.data));
+
+
+
       
-	
-	
-	
-	 if( !req.body.hasOwnProperty("data") ) {
+    
+    
+    
+     if( !req.body.hasOwnProperty("data") ) {                                          
          responseJson.message = "Request missing data parameter.";
          return res.status(422).send(JSON.stringify(responseJson.message));
      }
@@ -60,234 +94,281 @@ console.log(req.body.deviceId);
          responseJson.message = "Request missing apikey parameter.";
          return res.status(422).send(JSON.stringify(responseJson.message));
      }
-	
-	 if( !req.body.hasOwnProperty("deviceId") ) {
+    
+     if( !req.body.hasOwnProperty("deviceId") ) {
          responseJson.message = "Request missing apikey parameter.";
          return res.status(422).send(JSON.stringify(responseJson.message));
      }
 
 
 
-	 
-	
-	 Device.findOne({
-                 apikey: req.body.apikey,
-		 deviceId: req.body.deviceId
-		 		 }, function(err,device){
-							 if (err) {
-            						 responseJson.success = false;
-            						 responseJson.message = "Error accessing db.";
-            						 return res.status(503).send(JSON.stringify(responseJson));
-        						 }
-						 if(!device){
-							 responseJson.success = false;
-							 responseJson.message = "Device not registered or incorrect apikey or not associated with this account";
-							 console.log("device not found");
-							 return res.status(400).send(JSON.stringify(responseJson.message));
-
-							 }
-							
-							userEmail = device.userEmail;
-        			
-
-							
-
-
-				
-				
-		 
-
-
-
-	
-   
      
-	
-		
-	
-	 var data = req.body.data.split(",");
-	 var lat;
-	 var lon;
-	 var speed;
-	 var uv;
-	 var sample;
-	 
-	 if(data[data.length-1]=="stop"){
-		data.pop();
-		endFlag =true;
-	 }
-	
-	 if(data[0]>0){
-		 start = data[0];
-		 start = start*1000;
-		 realStart = start;
-	 }
-	 for(let i = 4;i<data.length;i+=5){
-			 lat = data[i-3];
-			 lon = data[i-2];
-			 speed = data[i-1]*1.150779; //convert knots to mph
-			 uv = data[i];
-			 sample = new ActivitySample({
-						 longitude: lon,
-						 latitude:  lat,
-						 speed:     speed,    
-						 uv:        uv,
-						 id:        num
-						
-					 });
-			samples.push(sample);
-			numSamples++;	
-	 }
+    
+     Device.findOne({
+                 apikey: req.body.apikey,
+         deviceId: req.body.deviceId
+                 }, function(err,device){
+                  
+                             if (err) {
+                                     responseJson.success = false;
+                                     responseJson.message = "Error accessing db.";
+                                     return res.status(503).send(JSON.stringify(responseJson));
+
+                                 }
+                         if(!device){
+                             responseJson.success = false;
+                             responseJson.message = "Device not registered or incorrect apikey or not associated with this account";
+                             console.log("device not found");
+                             return res.status(400).send(JSON.stringify(responseJson.message));
+
+                             }
+                            
+                            userEmail = device.userEmail;
+                    
+
+                            
 
 
-	 
-	var weatherLon = samples[0].longitude;
-	var weatherLat = samples[0].latitude;
-
-
-		
-
-		if(endFlag == true && samples.length>0){
-			
-
-		 var avgSpeed = 0;
-		
-		 for(let i=0;i<samples.length;i++){
-				 avgSpeed+=samples[i].speed;
-		 }
-		 avgSpeed = avgSpeed/samples.length;
-		
-		 if(avgSpeed> 0 && avgSpeed <= walkingMax){
-			 type = "walking";
-		 }
-		
-		 if(avgSpeed> walkingMax && avgSpeed <= runningMax){
-			 type = "running";
-		 }
-		
-		 if(avgSpeed> runningMax){
-			 type = "biking";
-		 }
-
-		 var totUV = 0;
-
-		 for(let i=0;i<samples.length;i++){
-		 	totUV +=samples[i].uv;
-		 }
-		
+                
+                
+         
 
 
 
-			 endTime = realStart + (samples.length * 15000);
-			 var duration = Number(endTime-realStart);
-			 if(duration <60000){
-			 	duration = duration/1000;
-			 	duration = duration + " seconds";
-			 }
-			 else if(duration>60000 && duration <3600000){
-			 	duration = duration/1000;
-			 	var secs =  duration % 60;
-			 	duration = duration -secs;
-			 	duration = duration / 60;
-			 	duration = duration + " minutes " + secs+ " seconds";
-			 }
-			 else{
-			 	duration = duration/1000;
-			 	var secs =  duration % 60;
-			 	duration = duration -secs;
-			 	duration = duration/60; //min
-			 	var mins = duration % 60;
-			 	duration = duration - mins;
-			 	durartion = duration /60;
-			 	duration  = duration +" hours " +mins+" minutes "+secs+" secs";
+    
+     
+    
+     var data = req.body.data;   
+     var data = data.split(",");
+     
+    // var jdata = JSON.parse(req.body.data);
+     //var data = jdata.data.split(",");
+     var lat;
+     var lon;
+     var speedMax = 0 ;
+     var uv;
+     var sample;
+     var totUV = 0;
+
+     console.log(data);
+     //console.log("data[0]"+data[1]);
+     
+     // if(data[data.length-1]=="stop"){
+     //    data.pop();
+     //    endFlag =true;
+     // }
+     if(data[0]>0){
+         samples = [];
+         start = data[0];
+         start = start*1000;
+         realStart = start;
+     for(let i = 4;i<data.length;i+=5){
+
+             lat = data[i-3];
+             lon = data[i-2];
+             speed = data[i-1]*1.150779; //convert knots to mph
+             uv = data[i];
+             totUV+=uv;
+             if(speed>speedMax){
+                speedMax = speed;
+             }
+             sample = new ActivitySample({
+                         longitude: lon,
+                         latitude:  lat,
+                         speed:     speed,    
+                         uv:        uv,
+                         id:        num
+                        
+                     });
+            samples.push(sample);
+            numSamples++;   
+
+             }
+             console.log("samples array length: "+samples.length);
+             var weatherLon = samples[0].longitude;
+             var weatherLat = samples[0].latitude;
 
 
-			 }
-			 endTime = Date(endTime);
-			
-			 realStart = Date(realStart);
-			 			 
-			//change lat and lon to come from device
-	 request({
+
+
+
+
+
+              request({
         method: "GET",
         uri: "http://api.openweathermap.org/data/2.5/weather?lat="+weatherLat+"&lon="+weatherLon+"&units=imperial&appid=092b2e289298b368fb3c48b8b747b8af",
        
      },function(err, data){
-		 //console.log(JSON.parse(data.body));
-		 var temp = JSON.parse(data.body).main.temp;
-		 var hum = JSON.parse(data.body).main.humidity;
-		//console.log("weather data should follow:"+ temp + " "+hum);		
-		  			 var activity = new Activity({
-								 start:        realStart,
-								 type:         type,
-								 id:           num,
-								 samples:      samples,
-								 duration:     duration,     
-								 deviceId:     req.body.deviceId,
-								 apikey:       req.body.apikey,
-								 userEmail:     userEmail,  
-								 uv:            totUV,
-								 weather:      {temperature: temp, humidity: hum}  
-								
-							 });
-console.log("weather data should follow:"+ activity.weather.temperature + " "+activity.weather.humidity);
+         if(speedMax>runningMax){
+            type = "biking"; 
+         }
+         else if(speedMax>walkingMax){
+            type = "running";
+         }
+         //console.log(JSON.parse(data.body));
+         var temp = JSON.parse(data.body).main.temp;
+         var hum = JSON.parse(data.body).main.humidity;
+        //console.log("weather data should follow:"+ temp + " "+hum); 
+         
+          duration = samples.length *15000; 
+             duration = getDur(duration);
 
-			 samples = [];
-			 numSamples = 0;
-			 num++;
-			 end = false;
-			 realStart = 0;
-			 endTime = 0;
-			 type = "default";
-			
-			 activity.save(function(err, newActivity) {
-				 if (err) {
-					 responseJson.status = "ERROR";
-					 responseJson.message = "Error saving data in db." + err;
-					 return res.status(503).send(JSON.stringify(responseJson));
-				 }
-			
-				 responseJson.success = true;
-				 return res.status(201).send(JSON.stringify(201));
-				
-				 });
-		
-	 });
+                     var activity = new Activity({
+                                 //start:        realStart,
+                                 type:         type, //TODO update type at end based on max
+                                 id:           num,
+                                 samples:      samples,
+                                 duration:     duration,     
+                                 deviceId:     req.body.deviceId,
+                                 apikey:       req.body.apikey,
+                                 userEmail:     userEmail,  
+                                 uv:            totUV,
+                                 weather:      {temperature: temp, humidity: hum}  
+                                
+                             });
 
-
-
-		}
-	
-			     
-
-	
-    
-
+             samples = [];
+             numSamples = 0;
+             num++;
+             end = false;
+             realStart = 0;
+             endTime = 0;
+             
+            
+             activity.save(function(err, newActivity) {
+                 if (err) {
+                     responseJson.status = "ERROR";
+                     responseJson.message = "Error saving data in db." + err;
+                     return res.status(503).send(JSON.stringify(responseJson));
+                 }
+            
+                 responseJson.success = true;
+                 console.log("activtiy created");
+                 return res.status(201).send(JSON.stringify(201));
+                 
+                 });
         
-	//console.log(req.body.data);
-	//return res.status(201).send(JSON.stringify("yellow"));
+     });
+
+      }
+
+      else{
+       //update activity
+      // return res.status(201).send(JSON.stringify(201));
+       samples = [];
+       for(let i = 4;i<data.length;i+=5){
+
+             lat = data[i-3];
+             lon = data[i-2];
+             speed = data[i-1]*1.150779; //convert knots to mph
+             uv = data[i];
+             totUV+=uv;
+             if(speed>speedMax){
+                speedMax = speed;
+             }
+             sample = new ActivitySample({
+                         longitude: lon,
+                         latitude:  lat,
+                         speed:     speed,    
+                         uv:        uv,
+                         id:        num
+                        
+                     });
+            samples.push(sample);
+            numSamples++;   
+             }
+             console.log("samples array length: "+samples.length);
+
+      //   // var newSamples = [];
+      //   // var newTotalUV = 0;
+      //   // var newDuration = 0;
+      //   // var newType = "walking";
+        console.log(samples);
+       Activity.findOne({},function(err,data){
+
+        if(err){
+            res.status(401).json({success:false,message:"failed to find an activity"});
+        }
+        for(let samp of data.samples){
+            samples.push(samp);
+        }
+        var newSamps = samples;
+        totUV += data.uv;
+        
+        duration = newSamps.length *15000; 
+             duration = getDur(duration);
+
+
+        if(data.type!= "biking"){
+             if(speedMax>runningMax){
+            type = "biking"; 
+         }
+
+         else if(speedMax>walkingMax){
+            type = "running";
+         }   
+        }
+        else if(data.type !="running"){
+                if(speedMax>walkingMax){
+                    type = "running";
+                }   
+        }
+
+       
+        query = {type:type,uv:totUV,duration:duration,samples:newSamps};
+        Activity.updateOne({_id:data._id},{$set:query},function(err,result){
+                if(err){
+                    //console.log(err);
+                    
+                    res.status(401).json({success:false,message:"failed to update activity"});
+                }
+
+                else{
+                    console.log("success updating activity");
+                    res.status(201).json({success:false,message:"updated"});
+                }
+
+       });
+
+
+
+
+
+
+      }).sort({_id:-1});
+
+
+    
+     
+            
+             
+        
+
  
-});
+ 
+}
 
 });
+});
+
 
 
 router.post("/update",function(req,res){
-	 let responseJson = {
+     let responseJson = {
         success: false,
         id: req.body.ref,
         message : ""
     };
     Activity.updateOne({_id:req.body.ref},{type:req.body.type},function(err,result){
-    	if(err){
-    		responseJson.message = "not updated";
-    		return res.status(400).json(responseJson);
-    	}
-    	responseJson.message = JSON.stringify(result);
-    	responseJson.success = true;
-    	return res.status(201).json(responseJson);
+        if(err){
+            responseJson.message = "not updated";
+            return res.status(400).json(responseJson);
+        }
+        responseJson.message = JSON.stringify(result);
+        responseJson.success = true;
+        return res.status(201).json(responseJson);
     });
-	
+    
 
 });
 
@@ -327,13 +408,13 @@ router.get("/summary/:days", function(req, res) {
      //       $gte: new Date((new Date().getTime() - (days * 24 * 60 * 60 * 1000)))
       //  },
 
-	"userEmail": decodedToken.email
-	
+    "userEmail": decodedToken.email
+    
     }).sort({ "_id": -1 });
     
     
     activitiesQuery.exec({}, function(err, activities) {
-	
+    
         if (err) {
             responseJson.success = false;
             responseJson.message = "Error accessing db.";
@@ -341,20 +422,20 @@ router.get("/summary/:days", function(req, res) {
         }
         else {  
             let numActivities = 0;
-			
+            
             for (let a of activities) {
                 // Add activity data to the respone's array
                 numActivities++; 
-				//console.log(a._id);
+                //console.log(a._id);
                 responseJson.activities.push({
                     type: a.type,
-					date: a.date,
-					start: a.start,
-					duration: a.duration,
-					uv: a.uv,
-					weather: a.weather,
-					id: a._id,
-					samples: a.samples
+                    date: a.date,
+                    start: a.start,
+                    duration: a.duration,
+                    uv: a.uv,
+                    weather: a.weather,
+                    id: a._id,
+                    samples: a.samples
                     
                 });
             }
@@ -366,9 +447,9 @@ router.get("/summary/:days", function(req, res) {
 router.get("/detail/:number", function(req, res) {
     //console.log("ID FROM QUEREY "+id);
         let responseJson = {
-	      samples: [],
-		type:"",
-		activity: ""
+          samples: [],
+        type:"",
+        activity: ""
     };
     if (authenticateRecentEndpoint) {
         var decodedToken = authenticateAuthToken(req);
@@ -378,7 +459,7 @@ router.get("/detail/:number", function(req, res) {
             return res.status(401).json(responseJson);
         }
     }
-    	console.log("_id: "+req.params.number);
+        console.log("_id: "+req.params.number);
 
         let activitiesQuery = Activity.findOne({
       "_id":req.params.number
@@ -395,9 +476,9 @@ router.get("/detail/:number", function(req, res) {
             return res.status(200).send(JSON.stringify(responseJson));
         }
         else { 
-        	responseJson.activity = activity;
+            responseJson.activity = activity;
      //       for (let a of activities) {
-		responseJson.type = activity.type;
+        responseJson.type = activity.type;
                 for (let sample of activity.samples){
                 responseJson.samples.push({
                           start:sample.start,
@@ -407,16 +488,16 @@ router.get("/detail/:number", function(req, res) {
                           uv:sample.uv
                 });
                 }
-                if(activity.samples.length == 0){
-                        responseJson.samples.push({
-                                start:0,
-                                longitude:0,
-                                latitude:0,
-                                speed:0,
-                                uv:0
+                // if(activity.samples.length == 0){
+                //         responseJson.samples.push({
+                //                 start:0,
+                //                 longitude:0,
+                //                 latitude:0,
+                //                 speed:0,
+                //                 uv:0
 
-                        });
-                }
+                //         });
+                // }
            // }
                            return res.status(200).send(JSON.stringify(responseJson));
         }

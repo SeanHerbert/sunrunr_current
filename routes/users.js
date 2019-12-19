@@ -26,7 +26,7 @@ var secret = fs.readFileSync(__dirname + '/../../jwtkey').toString();
 
 router.post('/signin', function(req, res, next) {
    
-  //console.log(clientIp);
+  
   User.findOne({email: req.body.email}, function(err, user) {
     if (err) {
        res.status(401).json({success : false, message : "Can't connect to DB."});         
@@ -42,6 +42,7 @@ router.post('/signin', function(req, res, next) {
          else if(valid) {
             var authToken = jwt.encode({email: req.body.email}, secret);
             var clientIp = requestIp.getClientIp(req);
+console.log(clientIp);
 
             
 
@@ -94,7 +95,7 @@ router.post('/update', function(req, res, next) {
 
   //check for authtoken
   if (!req.headers["x-auth"]) {
-          
+          console.log("no token");
           return res.status(401).json({success: false, message: "No authentication token"});
        }
 
@@ -126,11 +127,13 @@ router.post('/update', function(req, res, next) {
     User.findOne({email: t_email}, function(err, user) {
     //if error return
     if (err) {
+      console.log("error finding user by email");
        res.status(401).json({success : false, message : "Can't connect to DB."});         
     }
 
     //user not found
     else if(!user) {
+      console.log("user not found");
        res.status(401).json({success : false, message : "user no existe!."});         
     }
 
@@ -156,6 +159,7 @@ router.post('/update', function(req, res, next) {
         bcrypt.hash(pw, 10, function(err, hash) {
             //if error hashing return
             if (err) {
+               console.log("problem with hashing");
                res.status(401).json({success : false, message : "not authorized"});         
             }
 
@@ -173,6 +177,7 @@ router.post('/update', function(req, res, next) {
 
                   // if error return 
                   if(err){
+                    console.log("couldn't update user. but inside bcrpyt hash");
                     res.status(401).json({success : false, message : "couldn't update user. but inside bcrpyt hash"});
                   }
                   else{
@@ -239,6 +244,7 @@ router.post('/update', function(req, res, next) {
           User.update({email:t_email},{$set:jsonQuery},function(err,result){
               //if error return 
                if(err){
+                console.log("couldn't update user. But user not trying to update pwd");
                     res.status(401).json({success : false, message : "couldn't update. But user not trying to update pwd"});
                   }
 
@@ -303,6 +309,7 @@ router.post('/update', function(req, res, next) {
 
   }
   catch(ex){
+     console.log("in catch error");
     return res.status(401).json({success: false, message: "Invalid authentication token"}); 
   }
 });

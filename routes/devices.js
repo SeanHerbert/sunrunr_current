@@ -29,14 +29,17 @@ router.post('/thresh', function(req, res, next) {
     Device.findOne({deviceId: req.body.deviceId, apikey: req.body.apikey}, function(err, device){
         console.log("Looking for device " + req.body.deviceId);
         if(err || !device){
-            res.status(401).send({success: false, error: err});
-            console.log(err);
+          console.log(err);
+          console.log("~~~~~~~~~~~~~~~");
+            res.status(200).json(-1);
+            
         }
         else{
             console.log("Looking for email" + device.userEmail);
             User.findOne({email: device.userEmail}, function(err, user){
+                console.log(user.threshold);
                 if(err || !user){
-                    res.status(400).send({success: false, error: err});
+                    res.status(200).json(-1);
                     console.log(err);
                 }
                 else{
@@ -47,7 +50,7 @@ router.post('/thresh', function(req, res, next) {
                     res.status(200).json(//{
                         //success: true,
                         //threshold: 
-      user.threshold
+                          user.threshold
                     //}
 );
                 }

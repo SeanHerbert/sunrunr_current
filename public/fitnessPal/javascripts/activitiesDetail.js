@@ -96,6 +96,7 @@ function setChecked(type){
 }
 function putCals(){
   var burned = 0;
+
   if(type == 'walking'){
   if(avgSpeed<=2){
       burned = 3*mins; 
@@ -152,6 +153,9 @@ if(type == 'biking'){
     burned = 21*mins;
   }
 }
+if(avgSpeed ==0){
+    burned= 0;
+  }
 $('#cals').html(burned.toFixed(2));
 $('#actyp').html(` ${type}`);
 }

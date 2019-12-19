@@ -15,6 +15,9 @@ function getActivitiesSummary() {
 
 function getCals(){
   var burned = 0;
+if(avgSpeed==0){
+  return 0;
+}
   if(type == 'walking'){
   if(avgSpeed<=2){
       burned = 3*mins; 

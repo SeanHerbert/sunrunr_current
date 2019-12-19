@@ -17,7 +17,7 @@ function accountInfoSuccess(data, textSatus, jqXHR) {
   $("#fullName").html(data.fullName);
   $("#lastAccess").html(iso2std(data.lastAccess));
   $("#main").show();
-  if(data.thresh){
+  if(data.thresh && data.thresh !==-1){
     console.log("thresh value is present");
     $("#curr-thresh-val").html(data.thresh);
     $("#currThresh").show();
@@ -348,11 +348,11 @@ function showThreshForm(){
     var insert_thr =  `<div id="updateForm" class="card white teal-text" >
   <div class="card-content teal-text">
      <span class="card-title"><b><b>Set UV Threshold</b></b></span>
-     <p class = "red-text">Value must be numeric and positive.</p>
+     <p class = "red-text">Value must be numeric and positive.<br> Units are in watts/cm<sup>2</sup></p>
   
    <div class="input-field">
       <label for="thresh-val">Threshold</label>
-      <input class = "teal-text" type="text" name="thresh-val" id="thresh-val">
+      <input class = "teal-text" type="text" name="thresh-val" id="thresh-val" >
     </div>
     
   
@@ -426,7 +426,7 @@ function setThresh(){
 function threshSuccess(data, textStatus, jqXHR){
   $('#thresh-setta').html(sunBad); 
   //put thresh into HTML
-  $('#curr-thresh-val').html(thresh);
+  $('#curr-thresh-val').html(thresh+"watts/cm<sup>2</sup>");
   showCurrThresh();
   console.log(data.changeData);
 
